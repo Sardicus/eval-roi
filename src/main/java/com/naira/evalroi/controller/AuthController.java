@@ -1,5 +1,6 @@
 package com.naira.evalroi.controller;
 
+import com.naira.evalroi.dto.AuthResponseDto;
 import com.naira.evalroi.dto.Enums;
 import com.naira.evalroi.dto.LoginDto;
 import com.naira.evalroi.dto.RegisterDto;
@@ -7,6 +8,7 @@ import com.naira.evalroi.entity.Role;
 import com.naira.evalroi.entity.UserEntity;
 import com.naira.evalroi.repository.RoleRepository;
 import com.naira.evalroi.repository.UserRepository;
+import com.naira.evalroi.security.JWTGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +33,7 @@ public class AuthController {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final JWTGenerator jwtGenerator;
 
     @PostMapping("register")
     public ResponseEntity<String> register(@RequestBody RegisterDto registerDto) {
@@ -55,8 +58,9 @@ public class AuthController {
         userRepository.save(userEntity);
         return new ResponseEntity<>("User registered successfully", HttpStatus.OK);
     }
+
     @PostMapping("login")
-    public ResponseEntity<String> login(@RequestBody LoginDto loginDto) {
+    public ResponseEntity<AuthResponseDto> login(@RequestBody LoginDto loginDto) {
         String username = null;
         if (Enums.LoginWith.EMAIL.equals(loginDto.getLoginWith())) {
             username = loginDto.getEmail();
@@ -69,7 +73,8 @@ public class AuthController {
                         loginDto.getPassword())
         );
         SecurityContextHolder.getContext().setAuthentication(auth);
-        return new ResponseEntity<>("User signed in successfully", HttpStatus.OK);
+        String jwt = jwtGenerator.generateToken(auth);
+        return new ResponseEntity<>(new AuthResponseDto(jwt), HttpStatus.OK);
     }
 
 }
