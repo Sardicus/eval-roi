@@ -1,4 +1,4 @@
-package com.naira.evalroi.dto;
+package com.naira.evalroi.dto.auth;
 
 import lombok.Data;
 

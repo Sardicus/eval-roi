@@ -11,7 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
-@Table(name = "USERS")
+@Table(name = "users")
 public class UserEntity extends BaseEntity {
     private String email;
     private String username;

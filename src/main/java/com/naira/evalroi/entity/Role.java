@@ -1,6 +1,6 @@
 package com.naira.evalroi.entity;
 
-import com.naira.evalroi.dto.Enums;
+import com.naira.evalroi.enums.RoleEnum;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -13,9 +13,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-@Table(name = "ROLE")
+@Table(name = "roles")
 public class Role extends BaseEntity {
 
-    @Enumerated(EnumType.ORDINAL)
-    private Enums.Role role;
+    @Enumerated(EnumType.STRING)
+    private RoleEnum role;
 }

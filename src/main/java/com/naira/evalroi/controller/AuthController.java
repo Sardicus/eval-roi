@@ -1,11 +1,12 @@
 package com.naira.evalroi.controller;
 
-import com.naira.evalroi.dto.AuthResponseDto;
-import com.naira.evalroi.dto.Enums;
-import com.naira.evalroi.dto.LoginDto;
-import com.naira.evalroi.dto.RegisterDto;
+import com.naira.evalroi.dto.auth.AuthResponseDto;
+import com.naira.evalroi.dto.auth.LoginDto;
+import com.naira.evalroi.dto.auth.RegisterDto;
 import com.naira.evalroi.entity.Role;
 import com.naira.evalroi.entity.UserEntity;
+import com.naira.evalroi.enums.LoginWith;
+import com.naira.evalroi.enums.RoleEnum;
 import com.naira.evalroi.repository.RoleRepository;
 import com.naira.evalroi.repository.UserRepository;
 import com.naira.evalroi.security.JWTGenerator;
@@ -52,7 +53,7 @@ public class AuthController {
         userEntity.setEmail(registerDto.getEmail());
         userEntity.setPassword(passwordEncoder.encode(registerDto.getPassword()));
 
-        Role  role = roleRepository.findByRole(Enums.Role.USER).get();
+        Role  role = roleRepository.findByRole(RoleEnum.USER).get();
         userEntity.setRoles(Collections.singletonList(role));
 
         userRepository.save(userEntity);
@@ -62,10 +63,10 @@ public class AuthController {
     @PostMapping("login")
     public ResponseEntity<AuthResponseDto> login(@RequestBody LoginDto loginDto) {
         String username = null;
-        if (Enums.LoginWith.EMAIL.equals(loginDto.getLoginWith())) {
+        if (LoginWith.EMAIL.equals(loginDto.getLoginWith())) {
             username = loginDto.getEmail();
         }
-        else if (Enums.LoginWith.USERNAME.equals(loginDto.getLoginWith())) {
+        else if (LoginWith.USERNAME.equals(loginDto.getLoginWith())) {
             username = loginDto.getUsername();
         }
        Authentication auth = authenticationManager.authenticate(
