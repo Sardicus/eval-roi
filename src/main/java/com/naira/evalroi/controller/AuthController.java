@@ -10,6 +10,7 @@ import com.naira.evalroi.enums.RoleEnum;
 import com.naira.evalroi.repository.RoleRepository;
 import com.naira.evalroi.repository.UserRepository;
 import com.naira.evalroi.security.JWTGenerator;
+import com.naira.evalroi.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,52 +31,18 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
-    private final PasswordEncoder passwordEncoder;
+   private final AuthService authService;
     private final AuthenticationManager authenticationManager;
     private final JWTGenerator jwtGenerator;
 
     @PostMapping("register")
     public ResponseEntity<String> register(@RequestBody RegisterDto registerDto) {
-        if (userRepository.existsByUsername(registerDto.getUsername())) {
-            return new ResponseEntity<>("Username is already taken", HttpStatus.BAD_REQUEST);
-        }
-        if (userRepository.existsByEmail(registerDto.getEmail())) {
-            return new ResponseEntity<>("Email is already in use", HttpStatus.BAD_REQUEST);
-        }
-        if (!registerDto.getConfirmPassword().equals(registerDto.getPassword())) {
-            return new ResponseEntity<>("Password is not valid", HttpStatus.BAD_REQUEST);
-        }
-
-        UserEntity userEntity = new UserEntity();
-        userEntity.setUsername(registerDto.getUsername());
-        userEntity.setEmail(registerDto.getEmail());
-        userEntity.setPassword(passwordEncoder.encode(registerDto.getPassword()));
-
-        Role  role = roleRepository.findByRole(RoleEnum.USER).get();
-        userEntity.setRoles(Collections.singletonList(role));
-
-        userRepository.save(userEntity);
-        return new ResponseEntity<>("User registered successfully", HttpStatus.OK);
+        return new ResponseEntity<>(authService.register(registerDto), HttpStatus.OK);
     }
 
     @PostMapping("login")
     public ResponseEntity<AuthResponseDto> login(@RequestBody LoginDto loginDto) {
-        String username = null;
-        if (LoginWith.EMAIL.equals(loginDto.getLoginWith())) {
-            username = loginDto.getEmail();
-        }
-        else if (LoginWith.USERNAME.equals(loginDto.getLoginWith())) {
-            username = loginDto.getUsername();
-        }
-       Authentication auth = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(username,
-                        loginDto.getPassword())
-        );
-        SecurityContextHolder.getContext().setAuthentication(auth);
-        String jwt = jwtGenerator.generateToken(auth);
-        return new ResponseEntity<>(new AuthResponseDto(jwt), HttpStatus.OK);
+        return new ResponseEntity<>(authService.login(loginDto), HttpStatus.OK);
     }
 
 }
