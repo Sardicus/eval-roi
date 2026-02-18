@@ -6,8 +6,11 @@ import com.naira.evalroi.enums.ListingStatus;
 import com.naira.evalroi.enums.PropertyType;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public record ListingResponseDto(
+        List<String> imageUrls,
+        String primaryImageUrl,
         String title,
         String description,
         PropertyType propertyType,

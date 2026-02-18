@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -20,6 +22,9 @@ public class Listing extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private UserEntity user;
+
+    @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ListingImage> images = new ArrayList<>();
 
     private String title;
     private String description;
@@ -54,4 +59,9 @@ public class Listing extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private HeatingType heatingType;
+
+    public void addImage(ListingImage image) {
+        images.add(image);
+        image.setListing(this);
+    }
 }
