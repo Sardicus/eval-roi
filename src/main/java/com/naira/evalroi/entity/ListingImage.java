@@ -19,6 +19,6 @@ public class ListingImage extends BaseEntity {
     @Column(nullable = false)
     String url;
 
-    private Integer order;
+    private Integer imageOrder;
     Boolean isPrimary = false;
 }

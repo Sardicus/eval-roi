@@ -76,7 +76,7 @@ public class ListingServiceImpl implements ListingService {
             ListingImage  listingImage = new ListingImage();
             listingImage.setIsPrimary(listing.getImages().isEmpty());
             listingImage.setUrl(url);
-            listingImage.setOrder(listing.getImages().size());
+            listingImage.setImageOrder(listing.getImages().size());
             listing.addImage(listingImage);
         }
         return listingMapper.toResponseDTO(listingRepository.save(listing));
