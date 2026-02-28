@@ -44,6 +44,12 @@ public class ListingServiceImpl implements ListingService {
     }
 
     @Override
+    public List<ListingResponseDto> getListings() {
+        List<Listing> listings = listingRepository.findAll();
+        return listings.stream().map(listingMapper::toResponseDTO).toList();
+    }
+
+    @Override
     @Transactional
     public void deleteListing(Integer id, String userIdentifier) {
         Listing listing = listingRepository.findById(id)

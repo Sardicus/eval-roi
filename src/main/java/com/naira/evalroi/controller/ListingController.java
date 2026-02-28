@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Arrays;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,6 +28,13 @@ public class ListingController {
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         return ResponseEntity.ok(listingService.createListing(request, userDetails.getUsername()));
+    }
+
+    @GetMapping("getAllListings")
+    public ResponseEntity<List<ListingResponseDto>> getAllListings(
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        return new ResponseEntity<>(listingService.getListings(), HttpStatus.OK);
     }
 
     @DeleteMapping("delete/{id}")

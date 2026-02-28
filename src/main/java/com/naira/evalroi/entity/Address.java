@@ -10,11 +10,14 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class Address {
-    private String address;
-    private String city;
-    private String district;     // ilçe
-    private String neighborhood; // mahalle
     private String zipCode;
     private Double latitude;     // enlem
     private Double longitude;    // boylam
+    private String city;
+    private String district;     // ilçe
+    private String neighborhood; // mahalle
+    private String street;
+    private String buildingNumber;
+    private String floor;
+    private String apartmentNumber;
 }
