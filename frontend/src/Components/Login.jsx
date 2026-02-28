@@ -1,9 +1,12 @@
 import React, { useState } from "react";
+import { useNavigate } from 'react-router-dom'
 
 function LoginForm() {
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+
+  const navigate = useNavigate();
 
   // Register form state
   const [registerData, setRegisterData] = useState({
@@ -55,7 +58,7 @@ function LoginForm() {
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem("token", data.accessToken);
-        setMessage("Login successful! Token saved.");
+        navigate("/listings");
       } else {
         const data = await response.json();
         setError(data.message || "Login failed.");
