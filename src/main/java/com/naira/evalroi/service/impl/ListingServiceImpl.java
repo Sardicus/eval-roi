@@ -64,7 +64,15 @@ public class ListingServiceImpl implements ListingService {
     @Override
     @Transactional
     public ListingResponseDto updateListing(Integer id, CreateListingRequest request, String userIdentifier) {
-        return null;
+        Listing listing = listingRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Listing not found"));
+        boolean isAuthorized = isUserAuthorizedWithListing(listing, userIdentifier);
+        if (!isAuthorized) {
+            throw new AuthorizationDeniedException("You are not authorized to update this listing");
+        }
+
+        listingMapper.updateEntityFromRequest(request, listing);
+        return listingMapper.toResponseDTO(listingRepository.save(listing));
     }
 
     @Override

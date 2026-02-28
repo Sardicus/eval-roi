@@ -30,13 +30,13 @@ function ListingsPage() {
         fetchListings();
     }, []);
 
-    return (      
+    return (
         <div className="p-8">
             <h1 className="text-2xl font-bold mb-6">Listings</h1>
 
-<button onClick={() => navigate("/add-listing")} className="mb-6 px-6 py-2 bg-cyan-500 text-white rounded-full hover:opacity-90">
-  + Add Listing
-</button>
+            <button onClick={() => navigate("/add-listing")} className="mb-6 px-6 py-2 bg-cyan-500 text-white rounded-full hover:opacity-90">
+                + Add Listing
+            </button>
 
             {error && <p className="text-red-500 mb-4">{error}</p>}
 
@@ -56,6 +56,9 @@ function ListingsPage() {
                         <p className="text-gray-500">{listing.address.city}</p>
                         <p className="text-gray-500">{listing.propertyType} | {listing.sizeM2}m² | {listing.bedroomCount} bd</p>
                         <p className="text-cyan-600 font-bold mt-2">${listing.price.toLocaleString()}</p>
+                        <button onClick={() => navigate(`/edit-listing/${listing.id}`)} className="mt-2 px-4 py-1 bg-cyan-500 text-white rounded-full text-sm hover:opacity-90">
+                            Edit
+                        </button>
                     </div>
                 ))}
             </div>

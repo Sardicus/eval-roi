@@ -30,6 +30,16 @@ public class ListingController {
         return ResponseEntity.ok(listingService.createListing(request, userDetails.getUsername()));
     }
 
+    @PutMapping("/updateListing/{id}")
+    public ResponseEntity<ListingResponseDto> updateListing(
+            @PathVariable Integer id,
+            @RequestBody @Valid CreateListingRequest request,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        return ResponseEntity.ok(listingService.updateListing(id, request, userDetails.getUsername())
+        );
+    }
+
     @GetMapping("getAllListings")
     public ResponseEntity<List<ListingResponseDto>> getAllListings(
             @AuthenticationPrincipal UserDetails userDetails

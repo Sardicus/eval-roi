@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom'
 import Login from './Components/Login'
 import ListingsPage from './Components/ListingsPage'
 import AddListingPage from './Components/AddListingPage'
+import EditListingPage from './Components/EditListingPage'
 
 const App = () => {
   return (
@@ -14,6 +15,7 @@ const App = () => {
       } />
       <Route path="/listings" element={<ListingsPage />} />
       <Route path="/add-listing" element={<AddListingPage />} />
+      <Route path="/edit-listing/:id" element={<EditListingPage />} />
     </Routes>
   )
 }

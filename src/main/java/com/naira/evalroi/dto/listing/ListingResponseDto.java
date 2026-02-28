@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public record ListingResponseDto(
+        Integer id,
         List<String> imageUrls,
         String primaryImageUrl,
         String title,
