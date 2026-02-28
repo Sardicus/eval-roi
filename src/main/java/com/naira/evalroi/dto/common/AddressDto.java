@@ -7,5 +7,8 @@ public record AddressDto(
         String neighborhood,
         String zipCode,
         Double latitude,
-        Double longitude
+        Double longitude,
+        String buildingNumber,
+        String floor,
+        String apartmentNumber
 ) {}

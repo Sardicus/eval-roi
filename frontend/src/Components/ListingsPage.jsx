@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from 'react-router-dom'
 
 function ListingsPage() {
     const [listings, setListings] = useState([]);
     const [error, setError] = useState("");
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchListings = async () => {
@@ -27,9 +30,13 @@ function ListingsPage() {
         fetchListings();
     }, []);
 
-    return (
+    return (      
         <div className="p-8">
             <h1 className="text-2xl font-bold mb-6">Listings</h1>
+
+<button onClick={() => navigate("/add-listing")} className="mb-6 px-6 py-2 bg-cyan-500 text-white rounded-full hover:opacity-90">
+  + Add Listing
+</button>
 
             {error && <p className="text-red-500 mb-4">{error}</p>}
 
