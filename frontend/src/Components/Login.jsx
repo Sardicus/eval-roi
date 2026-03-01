@@ -14,6 +14,7 @@ function LoginForm() {
     username: "",
     password: "",
     confirmPassword: "",
+    role: "USER",
   });
 
   // Login form state
@@ -174,6 +175,18 @@ function LoginForm() {
             value={registerData.confirmPassword}
             onChange={(e) => setRegisterData({ ...registerData, confirmPassword: e.target.value })} />
 
+          <div className="flex gap-4 mb-2">
+            <label className="flex items-center gap-1 cursor-pointer">
+              <input type="radio" name="role" checked={registerData.role === "USER"}
+                onChange={() => setRegisterData({ ...registerData, role: "USER" })} />
+              User
+            </label>
+            <label className="flex items-center gap-1 cursor-pointer">
+              <input type="radio" name="role" checked={registerData.role === "OWNER"}
+                onChange={() => setRegisterData({ ...registerData, role: "OWNER" })} />
+              Property Owner
+            </label>
+          </div>
           <button type="submit" className="w-full p-3 bg-gradient-to-r from-blue-700 via-cyan-600 to-cyan-200 text-white rounded-full text-lg font-medium hover:opacity-90 transition">
             Sign Up
           </button>

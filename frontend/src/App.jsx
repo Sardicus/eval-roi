@@ -4,6 +4,7 @@ import Login from './Components/Login'
 import ListingsPage from './Components/ListingsPage'
 import AddListingPage from './Components/AddListingPage'
 import EditListingPage from './Components/EditListingPage'
+import Navbar from './Components/Navbar'
 
 const App = () => {
   return (
@@ -13,9 +14,9 @@ const App = () => {
           <Login />
         </div>
       } />
-      <Route path="/listings" element={<ListingsPage />} />
-      <Route path="/add-listing" element={<AddListingPage />} />
-      <Route path="/edit-listing/:id" element={<EditListingPage />} />
+      <Route path="/listings" element={<><Navbar /><ListingsPage /></>} />
+      <Route path="/add-listing" element={<><Navbar /><AddListingPage /></>} />
+      <Route path="/edit-listing/:id" element={<><Navbar /><EditListingPage /></>} />
     </Routes>
   )
 }

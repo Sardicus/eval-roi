@@ -90,4 +90,22 @@ public class ListingController {
         listingService.setPrimaryImageForListing(listingId, imgId, userDetails.getUsername());
         return new ResponseEntity<>("Image set as primary successfully", HttpStatus.OK);
     }
+
+    @PutMapping("updateListingStatus/{listingId}")
+    public ResponseEntity<String> updateListingStatus(
+            @PathVariable Integer listingId,
+            @RequestParam String status,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        listingService.updateListingStatus(listingId, status, userDetails.getUsername());
+        return new ResponseEntity<>("Status updated successfully", HttpStatus.OK);
+    }
+
+    @GetMapping("getListingsByUser")
+    public ResponseEntity<List<ListingResponseDto>> getListingsByUser(
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        return new ResponseEntity<>(listingService.getListingsByUser(userDetails.getUsername()), HttpStatus.OK);
+    }
+
 }

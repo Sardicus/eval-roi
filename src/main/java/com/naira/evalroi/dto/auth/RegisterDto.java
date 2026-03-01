@@ -1,5 +1,6 @@
 package com.naira.evalroi.dto.auth;
 
+import com.naira.evalroi.enums.RoleEnum;
 import lombok.Data;
 
 @Data
@@ -8,4 +9,5 @@ public class RegisterDto {
     private String username;
     private String password;
     private String confirmPassword;
+    private RoleEnum role;
 }

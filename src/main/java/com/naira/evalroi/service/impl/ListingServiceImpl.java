@@ -5,6 +5,7 @@ import com.naira.evalroi.dto.listing.ListingResponseDto;
 import com.naira.evalroi.entity.Listing;
 import com.naira.evalroi.entity.ListingImage;
 import com.naira.evalroi.entity.UserEntity;
+import com.naira.evalroi.enums.ListingStatus;
 import com.naira.evalroi.enums.RoleEnum;
 import com.naira.evalroi.mapper.ListingMapper;
 import com.naira.evalroi.repository.ListingRepository;
@@ -46,6 +47,13 @@ public class ListingServiceImpl implements ListingService {
     @Override
     public List<ListingResponseDto> getListings() {
         List<Listing> listings = listingRepository.findAll();
+        return listings.stream().map(listingMapper::toResponseDTO).toList();
+    }
+
+    @Override
+    public List<ListingResponseDto> getListingsByUser(String userIdentifier) {
+        List<Listing> listings = listingRepository.findListingByUser_UsernameOrUser_Email(userIdentifier, userIdentifier)
+                .orElseThrow(() -> new UsernameNotFoundException("User's listings not found"));
         return listings.stream().map(listingMapper::toResponseDTO).toList();
     }
 
@@ -141,6 +149,20 @@ public class ListingServiceImpl implements ListingService {
                 .anyMatch(r -> r.getRole() == RoleEnum.ADMIN);
         boolean isOwner = listing.getUser().getId().equals(user.getId());
 
-        return isOwner && isAdmin;
+        return isOwner || isAdmin;
+    }
+
+    @Override
+    @Transactional
+    public void updateListingStatus(Integer listingId, String status, String userIdentifier) {
+        Listing listing = listingRepository.findById(listingId)
+                .orElseThrow(() -> new NoSuchElementException("Listing not found"));
+        boolean isAuthorized = isUserAuthorizedWithListing(listing, userIdentifier);
+        if (!isAuthorized) {
+            throw new AuthorizationDeniedException("You are not authorized to update status of this listing");
+        }
+
+        listing.setStatus(ListingStatus.valueOf(status));
+        listingMapper.toResponseDTO(listingRepository.save(listing));
     }
 }

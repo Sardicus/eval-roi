@@ -66,7 +66,9 @@ public class AuthServiceImpl implements AuthService {
         userEntity.setEmail(registerDto.getEmail());
         userEntity.setPassword(passwordEncoder.encode(registerDto.getPassword()));
 
-        Role role = roleRepository.findByRole(RoleEnum.USER).get();
+        RoleEnum roleEnum = registerDto.getRole() != null ? registerDto.getRole() : RoleEnum.USER;
+        Role role = roleRepository.findByRole(roleEnum)
+                .orElseThrow(() -> new RuntimeException("Role not found"));
         userEntity.setRoles(Collections.singletonList(role));
 
         userRepository.save(userEntity);
