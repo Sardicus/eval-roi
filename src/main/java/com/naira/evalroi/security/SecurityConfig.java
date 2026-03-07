@@ -42,6 +42,8 @@ public class SecurityConfig {
                                 .permitAll()
                                 .requestMatchers("/uploads/**")
                                 .permitAll()
+                                .requestMatchers("/enums/**")
+                                .permitAll()
                                 .anyRequest()
                                 .authenticated());
         http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

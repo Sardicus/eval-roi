@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-
-const PROPERTY_TYPES = ["APARTMENT", "RESIDENCE", "VILLA", "DETACHED_HOUSE", "DUPLEX", "TRIPLEX", "PENTHOUSE", "STUDIO", "LAND", "FIELD", "VINEYARD", "OFFICE", "SHOP", "WAREHOUSE", "HOTEL", "PLAZA", "BUILDING", "FARMHOUSE"];
-const LISTING_STATUSES = ["ACTIVE", "INACTIVE", "SOLD"];
-const HEATING_TYPES = ["KOMBI", "CENTRAL_NATURAL_GAS", "CENTRAL_COAL", "CENTRAL_ELECTRIC", "UNDERFLOOR", "FLOOR_HEATER", "AIR_CONDITIONING", "STOVE_WOOD", "STOVE_COAL", "GEOTHERMAL", "NONE"];
+import { useEnums } from "../hooks/useEnums.js";
 
 function EditListingPage() {
   const { id } = useParams();
@@ -12,6 +9,7 @@ function EditListingPage() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const { propertyTypes, heatingTypes, listingStatuses } = useEnums();
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -206,13 +204,17 @@ function EditListingPage() {
             <div>
               <label className={labelClass}>Property Type *</label>
               <select name="propertyType" required className={inputClass} value={formData.propertyType} onChange={handleChange}>
-                {PROPERTY_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                {Object.entries(propertyTypes).map(([key, label]) => (
+                  <option key={key} value={key}>{label}</option>
+                ))}
               </select>
             </div>
             <div>
               <label className={labelClass}>Status</label>
               <select name="status" className={inputClass} value={formData.status} onChange={handleChange}>
-                {LISTING_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                {Object.entries(listingStatuses).map(([key, label]) => (
+                  <option key={key} value={key}>{label}</option>
+                ))}
               </select>
             </div>
           </div>
@@ -261,7 +263,9 @@ function EditListingPage() {
             <div>
               <label className={labelClass}>Heating Type</label>
               <select name="heatingType" className={inputClass} value={formData.heatingType} onChange={handleChange}>
-                {HEATING_TYPES.map(h => <option key={h} value={h}>{h}</option>)}
+                {Object.entries(heatingTypes).map(([key, label]) => (
+                  <option key={key} value={key}>{label}</option>
+                ))}
               </select>
             </div>
           </div>

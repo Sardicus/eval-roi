@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom'
+import { useEnums } from "../hooks/useEnums";
 
 function ListingsPage() {
     const [listings, setListings] = useState([]);
     const [error, setError] = useState("");
-
+    const { propertyTypes } = useEnums();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -90,7 +91,7 @@ function ListingsPage() {
                         {/* Info */}
                         <h2 className="text-lg font-semibold">{listing.title}</h2>
                         <p className="text-gray-500">{listing.address.city}</p>
-                        <p className="text-gray-500">{listing.propertyType} | {listing.sizeM2}m² | {listing.bedroomCount} bd</p>
+                        <p className="text-gray-500">{propertyTypes[listing.propertyType] || listing.propertyType} | {listing.sizeM2}m² | {listing.bedroomCount} bd</p>
                         <p className="text-cyan-600 font-bold mt-2">${listing.price.toLocaleString()}</p>
                         <button onClick={() => navigate(`/edit-listing/${listing.id}`)} className="mt-2 px-4 py-1 bg-cyan-500 text-white rounded-full text-sm hover:opacity-90">
                             Edit
