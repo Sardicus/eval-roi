@@ -27,16 +27,9 @@ function AddListingPage() {
     isFurnished: false,
     heatingType: "KOMBI",
     address: {
-      street: "",
-      city: "",
-      district: "",
-      neighborhood: "",
-      zipCode: "",
-      latitude: "",
-      longitude: "",
-      buildingNumber: "",
-      floor: "",
-      apartmentNumber: "",
+      street: "", city: "", district: "", neighborhood: "",
+      zipCode: "", latitude: "", longitude: "",
+      buildingNumber: "", floor: "", apartmentNumber: "",
     },
   });
 
@@ -57,10 +50,7 @@ function AddListingPage() {
       const token = localStorage.getItem("token");
       const response = await fetch("http://localhost:8080/listing/create", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify({
           ...formData,
           price: parseFloat(formData.price),
@@ -90,165 +80,139 @@ function AddListingPage() {
     }
   };
 
-  const inputClass = "w-full p-3 border border-gray-300 rounded-lg outline-none focus:border-cyan-500";
-  const labelClass = "block text-sm font-medium text-gray-700 mb-1";
+  const inputClass = "w-full px-4 py-3 rounded-lg bg-[#0f172a] border border-[#334155] text-white placeholder-[#64748b] outline-none focus:border-amber-400 transition-colors";
+  const labelClass = "block text-sm font-medium text-[#94a3b8] mb-1";
+  const sectionClass = "bg-[#1e293b] border border-[#334155] rounded-2xl p-6 space-y-4";
+  const sectionTitle = "text-white font-semibold text-lg mb-2";
 
   return (
-    <div className="max-w-3xl mx-auto p-8">
-      <h1 className="text-2xl font-bold mb-6">Add New Listing</h1>
+    <div className="min-h-screen bg-[#0f172a] p-8">
+      <div className="max-w-3xl mx-auto">
 
-      {error && <p className="text-red-500 mb-4">{error}</p>}
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-
-        {/* Basic Info */}
-        <div className="bg-white rounded-xl shadow p-6 space-y-4">
-          <h2 className="text-lg font-semibold">Basic Info</h2>
-          <div>
-            <label className={labelClass}>Title *</label>
-            <input name="title" required className={inputClass} value={formData.title} onChange={handleChange} />
-          </div>
-          <div>
-            <label className={labelClass}>Description</label>
-            <textarea name="description" rows={3} className={inputClass} value={formData.description} onChange={handleChange} />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className={labelClass}>Property Type *</label>
-              <select name="propertyType" required className={inputClass} value={formData.propertyType} onChange={handleChange}>
-                {Object.entries(propertyTypes).map(([key, label]) => (
-                  <option key={key} value={key}>{label}</option>
-                ))}
-              </select>
-
-            </div>
-            <div>
-              <label className={labelClass}>Status</label>
-              <select name="status" className={inputClass} value={formData.status} onChange={handleChange}>
-                {Object.entries(listingStatuses).map(([key, label]) => (
-                  <option key={key} value={key}>{label}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Details */}
-        <div className="bg-white rounded-xl shadow p-6 space-y-4">
-          <h2 className="text-lg font-semibold">Details</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className={labelClass}>Price *</label>
-              <input name="price" type="number" required className={inputClass} value={formData.price} onChange={handleChange} />
-            </div>
-            <div>
-              <label className={labelClass}>Size (m²) *</label>
-              <input name="sizeM2" type="number" required className={inputClass} value={formData.sizeM2} onChange={handleChange} />
-            </div>
-            <div>
-              <label className={labelClass}>Living Area (m²)</label>
-              <input name="livingAreaM2" type="number" className={inputClass} value={formData.livingAreaM2} onChange={handleChange} />
-            </div>
-            <div>
-              <label className={labelClass}>Bedrooms</label>
-              <input name="bedroomCount" type="number" className={inputClass} value={formData.bedroomCount} onChange={handleChange} />
-            </div>
-            <div>
-              <label className={labelClass}>Bathrooms</label>
-              <input name="bathroomCount" type="number" className={inputClass} value={formData.bathroomCount} onChange={handleChange} />
-            </div>
-            <div>
-              <label className={labelClass}>Rooms</label>
-              <input name="roomCount" type="number" className={inputClass} value={formData.roomCount} onChange={handleChange} />
-            </div>
-            <div>
-              <label className={labelClass}>Floor</label>
-              <input name="floorNumber" type="number" className={inputClass} value={formData.floorNumber} onChange={handleChange} />
-            </div>
-            <div>
-              <label className={labelClass}>Total Floors</label>
-              <input name="totalFloors" type="number" className={inputClass} value={formData.totalFloors} onChange={handleChange} />
-            </div>
-            <div>
-              <label className={labelClass}>Build Year</label>
-              <input name="buildYear" type="number" className={inputClass} value={formData.buildYear} onChange={handleChange} />
-            </div>
-            <div>
-              <label className={labelClass}>Heating Type</label>
-              <select name="heatingType" className={inputClass} value={formData.heatingType} onChange={handleChange}>
-                {Object.entries(heatingTypes).map(([key, label]) => (
-                  <option key={key} value={key}>{label}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Features */}
-        <div className="bg-white rounded-xl shadow p-6">
-          <h2 className="text-lg font-semibold mb-4">Features</h2>
-          <div className="grid grid-cols-3 gap-4">
-            {["hasParking", "hasElevator", "hasBalcony", "hasGarden", "isFurnished"].map((feature) => (
-              <label key={feature} className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" name={feature} checked={formData[feature]} onChange={handleChange} />
-                <span className="text-sm">{feature.replace(/([A-Z])/g, ' $1').replace('has ', 'Has ').replace('is ', 'Is ')}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-
-        {/* Address */}
-        <div className="bg-white rounded-xl shadow p-6 space-y-4">
-          <h2 className="text-lg font-semibold">Address</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className={labelClass}>City</label>
-              <input name="city" className={inputClass} value={formData.address.city} onChange={handleAddressChange} />
-            </div>
-            <div>
-              <label className={labelClass}>District</label>
-              <input name="district" className={inputClass} value={formData.address.district} onChange={handleAddressChange} />
-            </div>
-            <div>
-              <label className={labelClass}>Neighborhood</label>
-              <input name="neighborhood" className={inputClass} value={formData.address.neighborhood} onChange={handleAddressChange} />
-            </div>
-            <div>
-              <label className={labelClass}>Street</label>
-              <input name="street" className={inputClass} value={formData.address.street} onChange={handleAddressChange} />
-            </div>
-            <div>
-              <label className={labelClass}>Building Number</label>
-              <input name="buildingNumber" className={inputClass} value={formData.address.buildingNumber} onChange={handleAddressChange} />
-            </div>
-            <div>
-              <label className={labelClass}>Floor</label>
-              <input name="floor" className={inputClass} value={formData.address.floor} onChange={handleAddressChange} />
-            </div>
-            <div>
-              <label className={labelClass}>Apartment Number</label>
-              <input name="apartmentNumber" className={inputClass} value={formData.address.apartmentNumber} onChange={handleAddressChange} />
-            </div>
-            <div>
-              <label className={labelClass}>Zip Code</label>
-              <input name="zipCode" className={inputClass} value={formData.address.zipCode} onChange={handleAddressChange} />
-            </div>
-            <div>
-              <label className={labelClass}>Latitude</label>
-              <input name="latitude" type="number" className={inputClass} value={formData.address.latitude} onChange={handleAddressChange} />
-            </div>
-            <div>
-              <label className={labelClass}>Longitude</label>
-              <input name="longitude" type="number" className={inputClass} value={formData.address.longitude} onChange={handleAddressChange} />
-            </div>
-          </div>
-        </div>
-
-        <button type="submit" className="w-full p-3 bg-gradient-to-r from-blue-700 via-cyan-600 to-cyan-200 text-white rounded-full text-lg font-medium hover:opacity-90 transition">
-          Create Listing
+        {/* Header */}
+        <button onClick={() => navigate("/listings")} className="mb-6 text-[#94a3b8] hover:text-amber-400 transition-colors text-sm">
+          ← Back to Listings
         </button>
+        <h1 className="text-2xl font-bold text-white mb-6">Add New Listing</h1>
 
-      </form>
+        {error && <p className="text-red-400 mb-6 bg-red-400/10 rounded-xl px-4 py-3 text-sm">{error}</p>}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+
+          {/* Basic Info */}
+          <div className={sectionClass}>
+            <h2 className={sectionTitle}>Basic Info</h2>
+            <div>
+              <label className={labelClass}>Title *</label>
+              <input name="title" required className={inputClass} value={formData.title} onChange={handleChange} />
+            </div>
+            <div>
+              <label className={labelClass}>Description</label>
+              <textarea name="description" rows={3} className={inputClass} value={formData.description} onChange={handleChange} />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className={labelClass}>Property Type *</label>
+                <select name="propertyType" required className={inputClass} value={formData.propertyType} onChange={handleChange}>
+                  {Object.entries(propertyTypes).map(([key, label]) => (
+                    <option key={key} value={key}>{label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className={labelClass}>Status</label>
+                <select name="status" className={inputClass} value={formData.status} onChange={handleChange}>
+                  {Object.entries(listingStatuses).map(([key, label]) => (
+                    <option key={key} value={key}>{label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Details */}
+          <div className={sectionClass}>
+            <h2 className={sectionTitle}>Details</h2>
+            <div className="grid grid-cols-2 gap-4">
+              {[
+                { label: "Price *", name: "price", required: true },
+                { label: "Size (m²) *", name: "sizeM2", required: true },
+                { label: "Living Area (m²)", name: "livingAreaM2" },
+                { label: "Bedrooms", name: "bedroomCount" },
+                { label: "Bathrooms", name: "bathroomCount" },
+                { label: "Rooms", name: "roomCount" },
+                { label: "Floor", name: "floorNumber" },
+                { label: "Total Floors", name: "totalFloors" },
+                { label: "Build Year", name: "buildYear" },
+              ].map(({ label, name, required }) => (
+                <div key={name}>
+                  <label className={labelClass}>{label}</label>
+                  <input name={name} type="number" required={required} className={inputClass}
+                    value={formData[name]} onChange={handleChange} />
+                </div>
+              ))}
+              <div>
+                <label className={labelClass}>Heating Type</label>
+                <select name="heatingType" className={inputClass} value={formData.heatingType} onChange={handleChange}>
+                  {Object.entries(heatingTypes).map(([key, label]) => (
+                    <option key={key} value={key}>{label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Features */}
+          <div className="bg-[#1e293b] border border-[#334155] rounded-2xl p-6">
+            <h2 className={sectionTitle}>Features</h2>
+            <div className="grid grid-cols-3 gap-4">
+              {["hasParking", "hasElevator", "hasBalcony", "hasGarden", "isFurnished"].map((feature) => (
+                <label key={feature} className="flex items-center gap-3 cursor-pointer group">
+                  <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${
+                    formData[feature] ? "bg-amber-400 border-amber-400" : "border-[#334155] bg-[#0f172a]"
+                  }`}>
+                    {formData[feature] && <span className="text-[#0f172a] text-xs font-bold">✓</span>}
+                  </div>
+                  <input type="checkbox" name={feature} checked={formData[feature]} onChange={handleChange} className="hidden" />
+                  <span className="text-[#94a3b8] text-sm group-hover:text-white transition-colors">
+                    {feature.replace(/([A-Z])/g, ' $1').replace('has ', 'Has ').replace('is ', 'Is ')}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Address */}
+          <div className={sectionClass}>
+            <h2 className={sectionTitle}>Address</h2>
+            <div className="grid grid-cols-2 gap-4">
+              {[
+                { label: "City", name: "city" },
+                { label: "District", name: "district" },
+                { label: "Neighborhood", name: "neighborhood" },
+                { label: "Street", name: "street" },
+                { label: "Building Number", name: "buildingNumber" },
+                { label: "Floor", name: "floor" },
+                { label: "Apartment Number", name: "apartmentNumber" },
+                { label: "Zip Code", name: "zipCode" },
+                { label: "Latitude", name: "latitude", type: "number" },
+                { label: "Longitude", name: "longitude", type: "number" },
+              ].map(({ label, name, type }) => (
+                <div key={name}>
+                  <label className={labelClass}>{label}</label>
+                  <input name={name} type={type || "text"} className={inputClass}
+                    value={formData.address[name]} onChange={handleAddressChange} />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <button type="submit" className="w-full py-3 bg-amber-400 hover:bg-amber-300 text-[#0f172a] font-bold rounded-xl transition-colors text-sm tracking-wide">
+            Create Listing
+          </button>
+
+        </form>
+      </div>
     </div>
   );
 }
