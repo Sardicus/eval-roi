@@ -1,4 +1,4 @@
-package com.naira.evalroi.dto.evaluation;
+package com.naira.evalroi.dto.evaluation.simple;
 
 public record CategoryScoreDto(
         String categoryName,

@@ -1,7 +1,7 @@
 package com.naira.evalroi.dto.listing;
 
 import com.naira.evalroi.dto.common.AddressDto;
-import com.naira.evalroi.dto.evaluation.SimpleEvaluationDto;
+import com.naira.evalroi.dto.evaluation.simple.SimpleEvaluationDto;
 import com.naira.evalroi.enums.HeatingType;
 import com.naira.evalroi.enums.ListingStatus;
 import com.naira.evalroi.enums.PropertyType;

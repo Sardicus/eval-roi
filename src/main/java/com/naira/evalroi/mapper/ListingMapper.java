@@ -1,6 +1,6 @@
 package com.naira.evalroi.mapper;
 
-import com.naira.evalroi.dto.evaluation.SimpleEvaluationDto;
+import com.naira.evalroi.dto.evaluation.simple.SimpleEvaluationDto;
 import com.naira.evalroi.dto.listing.CreateListingRequest;
 import com.naira.evalroi.dto.listing.ListingResponseDto;
 import com.naira.evalroi.entity.Listing;

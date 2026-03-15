@@ -1,7 +1,7 @@
 package com.naira.evalroi.service.impl;
 
-import com.naira.evalroi.dto.evaluation.CategoryScoreDto;
-import com.naira.evalroi.dto.evaluation.SimpleEvaluationDto;
+import com.naira.evalroi.dto.evaluation.simple.CategoryScoreDto;
+import com.naira.evalroi.dto.evaluation.simple.SimpleEvaluationDto;
 import com.naira.evalroi.entity.Listing;
 import com.naira.evalroi.repository.ListingRepository;
 import com.naira.evalroi.service.ScoringStrategy;

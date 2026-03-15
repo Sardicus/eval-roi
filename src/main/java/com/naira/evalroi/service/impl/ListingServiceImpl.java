@@ -1,6 +1,6 @@
 package com.naira.evalroi.service.impl;
 
-import com.naira.evalroi.dto.evaluation.SimpleEvaluationDto;
+import com.naira.evalroi.dto.evaluation.simple.SimpleEvaluationDto;
 import com.naira.evalroi.dto.listing.CreateListingRequest;
 import com.naira.evalroi.dto.listing.ListingResponseDto;
 import com.naira.evalroi.dto.listing.ListingSpecification;
