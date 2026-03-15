@@ -2,9 +2,13 @@ package com.naira.evalroi.controller;
 
 import com.naira.evalroi.dto.listing.CreateListingRequest;
 import com.naira.evalroi.dto.listing.ListingResponseDto;
+import com.naira.evalroi.enums.ListingStatus;
+import com.naira.evalroi.enums.PropertyType;
 import com.naira.evalroi.service.ListingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -12,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
@@ -41,10 +46,16 @@ public class ListingController {
     }
 
     @GetMapping("getAllListings")
-    public ResponseEntity<List<ListingResponseDto>> getAllListings(
-            @AuthenticationPrincipal UserDetails userDetails
+    public ResponseEntity<Page<ListingResponseDto>> getAllListings(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) PropertyType propertyType,
+            @RequestParam(required = false) ListingStatus status,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
+            Pageable pageable
     ) {
-        return new ResponseEntity<>(listingService.getListings(), HttpStatus.OK);
+        return new ResponseEntity<>(listingService.getListings(title, city, propertyType, status, minPrice, maxPrice, pageable), HttpStatus.OK);
     }
 
     @DeleteMapping("delete/{id}")

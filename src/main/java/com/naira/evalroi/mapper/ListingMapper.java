@@ -1,5 +1,6 @@
 package com.naira.evalroi.mapper;
 
+import com.naira.evalroi.dto.evaluation.SimpleEvaluationDto;
 import com.naira.evalroi.dto.listing.CreateListingRequest;
 import com.naira.evalroi.dto.listing.ListingResponseDto;
 import com.naira.evalroi.entity.Listing;
@@ -16,6 +17,11 @@ public interface ListingMapper {
     @Mapping(source = "images", target = "imageUrls", qualifiedByName = "mapImagesToUrls")
     @Mapping(source = "images", target = "primaryImageUrl", qualifiedByName = "getPrimaryImageUrl")
     ListingResponseDto toResponseDTO(Listing listing);
+
+    @Mapping(source = "listing.images", target = "imageUrls", qualifiedByName = "mapImagesToUrls")
+    @Mapping(source = "listing.images", target = "primaryImageUrl", qualifiedByName = "getPrimaryImageUrl")
+    @Mapping(target = "simpleEvaluationSummary", source = "evaluation")
+    ListingResponseDto toResponseDTOWithEval(Listing listing, SimpleEvaluationDto evaluation);
 
     @Mapping(target = "status", constant = "ACTIVE")
     @Mapping(target = "user", ignore = true)
@@ -41,5 +47,4 @@ public interface ListingMapper {
                 .map(ListingImage::getUrl)
                 .toList();
     }
-
 }

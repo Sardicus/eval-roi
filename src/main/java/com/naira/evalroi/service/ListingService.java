@@ -2,14 +2,20 @@ package com.naira.evalroi.service;
 
 import com.naira.evalroi.dto.listing.CreateListingRequest;
 import com.naira.evalroi.dto.listing.ListingResponseDto;
+import com.naira.evalroi.enums.ListingStatus;
+import com.naira.evalroi.enums.PropertyType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface ListingService {
     ListingResponseDto createListing(CreateListingRequest request, String userIdentifier);
     ListingResponseDto getListingById(Integer id);
-    List<ListingResponseDto> getListings();
+//    List<ListingResponseDto> getListings();
+    Page<ListingResponseDto> getListings(String title, String city, PropertyType propertyType, ListingStatus status, BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable);
     List<ListingResponseDto> getListingsByUser(String userIdentifier);
     void deleteListing(Integer id, String userIdentifier);
     ListingResponseDto updateListing(Integer id, CreateListingRequest request, String userIdentifier);

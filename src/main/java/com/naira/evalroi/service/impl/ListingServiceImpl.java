@@ -1,23 +1,30 @@
 package com.naira.evalroi.service.impl;
 
+import com.naira.evalroi.dto.evaluation.SimpleEvaluationDto;
 import com.naira.evalroi.dto.listing.CreateListingRequest;
 import com.naira.evalroi.dto.listing.ListingResponseDto;
+import com.naira.evalroi.dto.listing.ListingSpecification;
 import com.naira.evalroi.entity.Listing;
 import com.naira.evalroi.entity.ListingImage;
 import com.naira.evalroi.entity.UserEntity;
 import com.naira.evalroi.enums.ListingStatus;
+import com.naira.evalroi.enums.PropertyType;
 import com.naira.evalroi.enums.RoleEnum;
 import com.naira.evalroi.mapper.ListingMapper;
 import com.naira.evalroi.repository.ListingRepository;
 import com.naira.evalroi.repository.UserRepository;
 import com.naira.evalroi.service.ListingService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -29,6 +36,7 @@ public class ListingServiceImpl implements ListingService {
     private final ListingMapper listingMapper;
     private final UserRepository userRepository;
     private final ImageManager imageManager;
+    private final SimpleEvaluationService simpleEvaluationService;
 
     @Override
     @Transactional
@@ -44,10 +52,28 @@ public class ListingServiceImpl implements ListingService {
         return listingMapper.toResponseDTO(listing);
     }
 
-    @Override
-    public List<ListingResponseDto> getListings() {
-        List<Listing> listings = listingRepository.findAll();
-        return listings.stream().map(listingMapper::toResponseDTO).toList();
+    public Page<ListingResponseDto> getListings(
+            String title, String city, PropertyType propertyType,
+            ListingStatus status, BigDecimal minPrice, BigDecimal maxPrice,
+            Pageable pageable
+    ) {
+        Specification<Listing> spec = Specification
+                .where(ListingSpecification.titleContains(title))
+                .and(ListingSpecification.hasCity(city))
+                .and(ListingSpecification.hasPropertyType(propertyType))
+                .and(ListingSpecification.hasStatus(status))
+                .and(ListingSpecification.minPrice(minPrice))
+                .and(ListingSpecification.maxPrice(maxPrice));
+
+        Page<Listing> page = listingRepository.findAll(spec, pageable);
+
+        return page.map(listing -> {
+
+            SimpleEvaluationDto evaluation =
+                    simpleEvaluationService.evaluate(listing.getId());
+
+            return listingMapper.toResponseDTOWithEval(listing, evaluation);
+        });
     }
 
     @Override
