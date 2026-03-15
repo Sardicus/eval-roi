@@ -24,12 +24,12 @@ public class EvaluationController {
     private final ListingService listingService;
     private final BuyerProfileService buyerProfileService;
 
-    @GetMapping("/simple/{listingId}")
-    public ResponseEntity<SimpleEvaluationDto> getSimpleEvaluation(
-            @PathVariable Integer listingId
-    ) {
-        return ResponseEntity.ok(simpleEvaluationService.evaluate(listingId));
-    }
+//    @GetMapping("/simple/{listingId}")
+//    public ResponseEntity<SimpleEvaluationDto> getSimpleEvaluation(
+//            @PathVariable Integer listingId
+//    ) {
+//        return ResponseEntity.ok(simpleEvaluationService.evaluate(listingId,));
+//    }
 
     @GetMapping("/enhanced/{listingId}")
     public ResponseEntity<EnhancedEvaluationResponse> getEnhancedEvaluation(

@@ -29,7 +29,7 @@ public class EnhancedEvaluationService {
         BuyerProfile profile = buyerProfileRepository.findByIdAndUserId(profileId,user.getId())
                 .orElseThrow(() -> new RuntimeException("Profile not found"));
 
-        SimpleEvaluationDto simpleEval = simpleEvaluationService.evaluate(listingId);
+        SimpleEvaluationDto simpleEval = simpleEvaluationService.evaluate(listingId,profileId);
 
         return new EnhancedEvaluationResponse(
                 listing.getId(),

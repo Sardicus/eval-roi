@@ -15,7 +15,7 @@ public interface ListingService {
     ListingResponseDto createListing(CreateListingRequest request, String userIdentifier);
     ListingResponseDto getListingById(Integer id);
 //    List<ListingResponseDto> getListings();
-    Page<ListingResponseDto> getListings(String title, String city, PropertyType propertyType, ListingStatus status, BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable);
+    Page<ListingResponseDto> getListings(String title, String city, PropertyType propertyType, ListingStatus status, BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable, Integer profileId);
     List<ListingResponseDto> getListingsByUser(String userIdentifier);
     void deleteListing(Integer id, String userIdentifier);
     ListingResponseDto updateListing(Integer id, CreateListingRequest request, String userIdentifier);

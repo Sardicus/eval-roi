@@ -23,61 +23,62 @@ public class BuildingSafetyScoreService implements ScoringStrategy {
 
     @Override
     public CategoryScoreDto calculateScore(Listing listing) {
-        double buildYearScore = getBuildYearScore(listing.getBuildYear());
-        double earthquakeRiskScore = getEarthquakeRiskScore(listing.getAddress().getDistrict());
-        double floorRiskScore = getFloorRiskScore(listing.getFloorNumber(), listing.getTotalFloors(), listing.getBuildYear());
-        double total = buildYearScore + earthquakeRiskScore + floorRiskScore;
+        ScoreAccumulator acc = new ScoreAccumulator();
 
-        return new CategoryScoreDto(
-                getCategoryName(),
-                total,
-                100.0,
-                getVerdict(total)
-        );
+        // Build year
+        Integer buildYear = listing.getBuildYear();
+        if (buildYear == null)       acc.add(25, "Build year unknown, default applied (+25)");
+        else if (buildYear >= 2019)  acc.add(50, "Build year " + buildYear + ": Modern construction (+50)");
+        else if (buildYear >= 2007)  acc.add(40, "Build year " + buildYear + ": Post-2007 earthquake code (+40)");
+        else if (buildYear >= 2000)  acc.add(30, "Build year " + buildYear + ": Early 2000s construction (+30)");
+        else if (buildYear >= 1999)  acc.add(20, "Build year " + buildYear + ": Pre-2000 construction (+20)");
+        else if (buildYear >= 1975)  acc.add(10, "Build year " + buildYear + ": Aging construction (+10)");
+        else                         acc.add(5,  "Build year " + buildYear + ": Very old construction (+5)");
+
+        // Earthquake zone
+        String districtName = listing.getAddress().getDistrict();
+        if (districtName == null) {
+            acc.add(17, "Earthquake zone unknown, default applied (+17)");
+        } else {
+            Optional<District> district = districtRepository.findByName(districtName);
+            if (district.isEmpty()) {
+                acc.add(17, "Earthquake zone not found for " + districtName + ", default applied (+17)");
+            } else {
+                switch (district.get().getEarthquakeRiskZone()) {
+                    case LOW       -> acc.add(35, "Earthquake zone: LOW risk (+35)");
+                    case MEDIUM    -> acc.add(25, "Earthquake zone: MEDIUM risk (+25)");
+                    case HIGH      -> acc.add(15, "Earthquake zone: HIGH risk (+15)");
+                    case VERY_HIGH -> acc.add(5,  "Earthquake zone: VERY HIGH risk (+5)");
+                }
+            }
+        }
+
+        // Floor risk
+        Integer floorNumber = listing.getFloorNumber();
+        Integer totalFloors = listing.getTotalFloors();
+        if (floorNumber == null || totalFloors == null) {
+            acc.add(7, "Floor data missing, default applied (+7)");
+        } else {
+            boolean isOld = buildYear != null && buildYear < 2000;
+            boolean isTop = floorNumber.equals(totalFloors);
+            boolean isGround = floorNumber == 1;
+            boolean isTall = totalFloors > 10;
+
+            if (isOld && isTop)       acc.add(2,  "Old building, top floor — high risk (+2)");
+            else if (isOld && isTall) acc.add(4,  "Old tall building — elevated risk (+4)");
+            else if (isOld && isGround) acc.add(6, "Old building, ground floor (+6)");
+            else if (isOld)           acc.add(7,  "Old building (+7)");
+            else if (isTall && isTop) acc.add(10, "New tall building, top floor (+10)");
+            else if (isGround)        acc.add(12, "Ground floor (+12)");
+            else                      acc.add(15, "Safe floor position (+15)");
+        }
+
+        double score = acc.getScore();
+        return new CategoryScoreDto(getCategoryName(), score, 100.0, getVerdict(score), acc.getFactors());
     }
 
-    private double getBuildYearScore(Integer buildYear) {
-        if (buildYear == null) return 25;
-        if (buildYear >= 2019) return 50;
-        if (buildYear >= 2007) return 40;
-        if (buildYear >= 2000) return 30;
-        if (buildYear >= 1999) return 20;
-        if (buildYear >= 1975) return 10;
-        return 5;
-    }
-
-    private double getEarthquakeRiskScore(String districtName) {
-        if (districtName == null) return 17;
-        Optional<District> district = districtRepository.findByName(districtName);
-
-        if (district.isEmpty()) return 17;
-
-        return switch (district.get().getEarthquakeRiskZone()) {
-            case LOW -> 35;
-            case MEDIUM -> 25;
-            case HIGH -> 15;
-            case VERY_HIGH -> 5;
-        };
-    }
-
-    private double getFloorRiskScore(Integer floorNumber, Integer totalFloors, Integer buildYear) {
-        if (floorNumber == null || totalFloors == null) return 7;
-
-        boolean isOldBuilding = buildYear != null && buildYear < 2000;
-        boolean isTopFloor = floorNumber.equals(totalFloors);
-        boolean isGroundFloor = floorNumber == 1;
-        boolean isTallBuilding = totalFloors > 10;
-
-        if (isOldBuilding && isTopFloor) return 2;
-        if (isOldBuilding && isTallBuilding) return 4;
-        if (isOldBuilding && isGroundFloor) return 6;
-        if (isOldBuilding) return 7;
-        if (isTallBuilding && isTopFloor) return 10;
-        if (isGroundFloor) return 12;
-        return 15;
-    }
-
-    private String getVerdict(double score) {
+    @Override
+    public String getVerdict(double score) {
         if (score >= 80) return "Excellent - Very safe building";
         if (score >= 60) return "Good - Reasonably safe building";
         if (score >= 40) return "Fair - Some safety concerns";

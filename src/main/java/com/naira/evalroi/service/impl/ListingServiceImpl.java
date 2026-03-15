@@ -55,7 +55,7 @@ public class ListingServiceImpl implements ListingService {
     public Page<ListingResponseDto> getListings(
             String title, String city, PropertyType propertyType,
             ListingStatus status, BigDecimal minPrice, BigDecimal maxPrice,
-            Pageable pageable
+            Pageable pageable, Integer profileId
     ) {
         Specification<Listing> spec = Specification
                 .where(ListingSpecification.titleContains(title))
@@ -70,7 +70,7 @@ public class ListingServiceImpl implements ListingService {
         return page.map(listing -> {
 
             SimpleEvaluationDto evaluation =
-                    simpleEvaluationService.evaluate(listing.getId());
+                    simpleEvaluationService.evaluate(listing.getId(),profileId);
 
             return listingMapper.toResponseDTOWithEval(listing, evaluation);
         });

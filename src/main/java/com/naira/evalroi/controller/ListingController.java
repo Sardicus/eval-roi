@@ -53,9 +53,13 @@ public class ListingController {
             @RequestParam(required = false) ListingStatus status,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(required = false) Integer profileId,
             Pageable pageable
     ) {
-        return new ResponseEntity<>(listingService.getListings(title, city, propertyType, status, minPrice, maxPrice, pageable), HttpStatus.OK);
+        return new ResponseEntity<>(
+                listingService.getListings(title, city, propertyType, status, minPrice, maxPrice, pageable, profileId),
+                HttpStatus.OK
+        );
     }
 
     @DeleteMapping("delete/{id}")

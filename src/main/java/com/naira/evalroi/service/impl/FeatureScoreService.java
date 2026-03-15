@@ -19,44 +19,27 @@ public class FeatureScoreService implements ScoringStrategy {
     @Override
     public CategoryScoreDto calculateScore(Listing listing) {
         PropertyType type = listing.getPropertyType();
+        ScoreAccumulator acc = new ScoreAccumulator();
 
-        double total;
         if (isVillaType(type)) {
-            total = calculateVillaScore(listing);
+            if (Boolean.TRUE.equals(listing.getHasParking()))  acc.add(30, "Parking available (+30)");
+            if (Boolean.TRUE.equals(listing.getHasGarden()))   acc.add(35, "Garden available (+35)");
+            if (Boolean.TRUE.equals(listing.getHasBalcony()))  acc.add(25, "Balcony available (+25)");
+            if (Boolean.TRUE.equals(listing.getIsFurnished())) acc.add(10, "Furnished (+10)");
         } else if (isCommercialType(type)) {
-            total = calculateCommercialScore(listing);
+            if (Boolean.TRUE.equals(listing.getHasParking()))  acc.add(50, "Parking available (+50)");
+            if (Boolean.TRUE.equals(listing.getHasElevator())) acc.add(30, "Elevator available (+30)");
+            if (Boolean.TRUE.equals(listing.getIsFurnished())) acc.add(20, "Furnished (+20)");
         } else {
-            total = calculateApartmentScore(listing);
+            if (Boolean.TRUE.equals(listing.getHasParking()))  acc.add(25, "Parking available (+25)");
+            if (Boolean.TRUE.equals(listing.getHasElevator())) acc.add(25, "Elevator available (+25)");
+            if (Boolean.TRUE.equals(listing.getHasBalcony()))  acc.add(20, "Balcony available (+20)");
+            if (Boolean.TRUE.equals(listing.getHasGarden()))   acc.add(15, "Garden available (+15)");
+            if (Boolean.TRUE.equals(listing.getIsFurnished())) acc.add(15, "Furnished (+15)");
         }
 
-        return new CategoryScoreDto(getCategoryName(), total, 100.0, getVerdict(total));
-    }
-
-    private double calculateApartmentScore(Listing listing) {
-        double score = 0;
-        if (Boolean.TRUE.equals(listing.getHasParking())) score += 25;
-        if (Boolean.TRUE.equals(listing.getHasElevator())) score += 25;
-        if (Boolean.TRUE.equals(listing.getHasBalcony())) score += 20;
-        if (Boolean.TRUE.equals(listing.getHasGarden())) score += 15;
-        if (Boolean.TRUE.equals(listing.getIsFurnished())) score += 15;
-        return score;
-    }
-
-    private double calculateVillaScore(Listing listing) {
-        double score = 0;
-        if (Boolean.TRUE.equals(listing.getHasParking())) score += 30;
-        if (Boolean.TRUE.equals(listing.getHasGarden())) score += 35;
-        if (Boolean.TRUE.equals(listing.getHasBalcony())) score += 25;
-        if (Boolean.TRUE.equals(listing.getIsFurnished())) score += 10;
-        return score;
-    }
-
-    private double calculateCommercialScore(Listing listing) {
-        double score = 0;
-        if (Boolean.TRUE.equals(listing.getHasParking())) score += 50;
-        if (Boolean.TRUE.equals(listing.getHasElevator())) score += 30;
-        if (Boolean.TRUE.equals(listing.getIsFurnished())) score += 20;
-        return score;
+        double score = acc.getScore();
+        return new CategoryScoreDto(getCategoryName(), score, 100.0, getVerdict(score), acc.getFactors());
     }
 
     private boolean isVillaType(PropertyType type) {
@@ -76,7 +59,8 @@ public class FeatureScoreService implements ScoringStrategy {
                 || type == PropertyType.BUILDING;
     }
 
-    private String getVerdict(double score) {
+    @Override
+    public String getVerdict(double score) {
         if (score >= 80) return "Excellent - Fully equipped property";
         if (score >= 60) return "Good - Well featured property";
         if (score >= 40) return "Fair - Basic features present";

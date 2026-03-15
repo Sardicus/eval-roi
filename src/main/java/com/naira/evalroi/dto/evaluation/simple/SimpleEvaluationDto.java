@@ -6,6 +6,5 @@ public record SimpleEvaluationDto(
         Integer listingId,
         List<CategoryScoreDto> categoryScores,
         Double totalScore,
-        Double maxTotalScore,
         String verdict
 ) {}
