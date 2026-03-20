@@ -1,9 +1,6 @@
 package com.naira.evalroi.controller;
 
 import com.naira.evalroi.dto.evaluation.enhanced.EnhancedEvaluationResponse;
-import com.naira.evalroi.dto.evaluation.simple.SimpleEvaluationDto;
-import com.naira.evalroi.entity.BuyerProfile;
-import com.naira.evalroi.entity.Listing;
 import com.naira.evalroi.service.BuyerProfileService;
 import com.naira.evalroi.service.ListingService;
 import com.naira.evalroi.service.impl.EnhancedEvaluationService;

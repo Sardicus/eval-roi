@@ -15,6 +15,7 @@ import com.naira.evalroi.repository.ListingRepository;
 import com.naira.evalroi.repository.UserRepository;
 import com.naira.evalroi.service.ListingService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -97,6 +98,7 @@ public class ListingServiceImpl implements ListingService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "enhancedEval", allEntries = true)
     public ListingResponseDto updateListing(Integer id, CreateListingRequest request, String userIdentifier) {
         Listing listing = listingRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Listing not found"));

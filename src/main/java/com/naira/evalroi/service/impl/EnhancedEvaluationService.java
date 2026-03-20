@@ -15,6 +15,7 @@ import com.naira.evalroi.repository.BuyerProfileRepository;
 import com.naira.evalroi.repository.ListingRepository;
 import com.naira.evalroi.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +31,7 @@ public class EnhancedEvaluationService {
     private final AnthropicClient anthropicClient;
     private final ObjectMapper objectMapper;
 
+    @Cacheable(value = "enhancedEval", key = "#listingId + '-' + #profileId")
     public EnhancedEvaluationResponse evaluate(Integer listingId, Integer profileId, String username) {
         UserEntity user = getUser(username);
         Listing listing = listingRepository.findById(listingId)
