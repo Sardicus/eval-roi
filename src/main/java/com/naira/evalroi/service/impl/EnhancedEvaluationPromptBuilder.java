@@ -11,95 +11,100 @@ public class EnhancedEvaluationPromptBuilder {
 
     public String buildSystemPrompt() {
         return """
-                You are a professional Turkish real estate analyst with deep knowledge of the Turkish property market.
-                You analyze properties and give personalized recommendations based on the buyer's profile and evaluation scores.
-                You are direct, honest and data-driven. You always respond in valid JSON format only — no extra text, no markdown, no code blocks.
+                Sen profesyonel bir Türk gayrimenkul analistisin. Türkiye emlak piyasası, şehirler, ilçeler, deprem riskleri ve yaşam koşulları hakkında derin bilgiye sahipsin.
+                Alıcı profiline ve değerlendirme skorlarına göre kişiselleştirilmiş, dürüst ve veriye dayalı tavsiyeler veriyorsun.
+                Skorların alıcının önceliklerine göre ağırlıklandırıldığını biliyorsun — örneğin güvenlik öncelikli bir profil için bina güvenliği skoru daha fazla ağırlık taşır.
+                Her zaman yalnızca geçerli JSON formatında yanıt veriyorsun — ekstra metin, markdown veya kod bloğu kullanmıyorsun.
+                Yanıtlarını her zaman Türkçe veriyorsun.
                 """;
     }
 
     public String buildUserPrompt(Listing listing, BuyerProfile profile, SimpleEvaluationDto simpleEval) {
         return """
-                Analyze this property for the given buyer profile and return a JSON response.
+                Aşağıdaki mülkü verilen alıcı profiline göre analiz et ve JSON formatında yanıt ver.
                 
-                PROPERTY:
-                - Title: %s
-                - Type: %s
-                - Location: %s, %s
-                - Price: ₺%s
-                - Size: %sm², Living Area: %sm²
-                - Bedrooms: %s, Bathrooms: %s, Rooms: %s
-                - Floor: %s / %s
-                - Build Year: %s
-                - Heating: %s
-                - Parking: %s | Elevator: %s | Balcony: %s | Garden: %s | Furnished: %s
+                MÜlk BİLGİLERİ:
+                - Başlık: %s
+                - Tür: %s
+                - Konum: %s, %s
+                - Fiyat: ₺%s
+                - Brüt Alan: %sm², Net Alan: %sm²
+                - Yatak Odası: %s, Banyo: %s, Oda Sayısı: %s
+                - Kat: %s / %s
+                - Yapım Yılı: %s
+                - Isıtma: %s
+                - Otopark: %s | Asansör: %s | Balkon: %s | Bahçe: %s | Eşyalı: %s
                 
-                EVALUATION SCORES:
+                DEĞERLENDIRME SKORLARI (Alıcı profiline göre ağırlıklandırılmış — toplam 100 üzerinden):
                 %s
                 
-                BUYER PROFILE:
-                - Profile Name: %s
-                - Household: %s
-                - Lifestyle: %s
-                - Priority: %s
-                - Budget Sensitivity: %s
-                - Purchase Intent: %s
-                - Age Group: %s
-                - Has Children: %s
-                - Has Pets: %s
-                - Has Vehicle: %s
-                - Has Disabled Member: %s
-                - Willing to Renovate: %s
-                - Min Size: %s m²
-                - Min Bedrooms: %s
-                - Budget Max: %s
-                - Commute Importance: %s
+                ALICI PROFİLİ:
+                - Profil Adı: %s
+                - Hane Tipi: %s
+                - Yaşam Tarzı: %s
+                - Öncelik: %s
+                - Bütçe Hassasiyeti: %s
+                - Satın Alma Amacı: %s
+                - Yaş Grubu: %s
+                - Çocuk Var mı: %s
+                - Evcil Hayvan Var mı: %s
+                - Araç Var mı: %s
+                - Engelli Birey Var mı: %s
+                - Tadilat Kabul: %s
+                - Minimum Alan: %s m²
+                - Minimum Yatak Odası: %s
+                - Maksimum Bütçe: %s
+                - Ulaşım Önemi: %s
                 
-                Respond with ONLY this JSON structure, no other text:
+                Yalnızca şu JSON yapısıyla yanıt ver, başka hiçbir metin ekleme:
                 {
-                  "summary": "2-3 sentence overall assessment of this property",
-                  "priceAnalysis": "price assessment specific to this buyer's budget and intent",
-                  "safetyAnalysis": "safety assessment considering buyer's specific situation",
-                  "featuresAnalysis": "features assessment relevant to this buyer's needs",
-                  "recommendation": "BUY or CONSIDER or AVOID",
-                  "recommendationReason": "1-2 sentence reason tailored to this buyer",
-                  "confidence": "HIGH or MEDIUM or LOW",
-                  "personalizedInsights": "specific insights based on their household, lifestyle and priorities"
+                  "summary": "Bu mülkün 2-3 cümlelik genel değerlendirmesi",
+                  "priceAnalysis": "Bu alıcının bütçesi ve amacına özel fiyat analizi",
+                  "safetyAnalysis": "Alıcının özel durumuna göre güvenlik analizi",
+                  "featuresAnalysis": "Alıcının ihtiyaçlarına göre özellik analizi",
+                  "recommendation": "AL veya DÜŞÜN veya KAÇIN",
+                  "recommendationReason": "Bu alıcıya özel 1-2 cümlelik gerekçe",
+                  "confidence": "YÜKSEK veya ORTA veya DÜŞÜK",
+                  "personalizedInsights": "Hane yapısı, yaşam tarzı ve önceliklere dayalı kişisel içgörüler"
                 }
                 """.formatted(
                 listing.getTitle(),
-                listing.getPropertyType(),
+                listing.getPropertyType().getDisplayName(),
                 listing.getAddress().getDistrict(), listing.getAddress().getCity(),
                 listing.getPrice().toPlainString(),
                 listing.getSizeM2(), listing.getLivingAreaM2(),
                 listing.getBedroomCount(), listing.getBathroomCount(), listing.getRoomCount(),
                 listing.getFloorNumber(), listing.getTotalFloors(),
                 listing.getBuildYear(),
-                listing.getHeatingType(),
-                listing.getHasParking(), listing.getHasElevator(), listing.getHasBalcony(),
-                listing.getHasGarden(), listing.getIsFurnished(),
+                listing.getHeatingType().getDisplayName(),
+                booleanToTurkish(listing.getHasParking()),
+                booleanToTurkish(listing.getHasElevator()),
+                booleanToTurkish(listing.getHasBalcony()),
+                booleanToTurkish(listing.getHasGarden()),
+                booleanToTurkish(listing.getIsFurnished()),
                 buildScoresSummary(simpleEval),
                 profile.getProfileName(),
-                profile.getHouseholdType(),
-                profile.getLifestylePreference(),
-                profile.getPriority(),
-                profile.getBudgetSensitivity(),
-                profile.getPurchaseIntent(),
-                profile.getAgeGroup(),
-                profile.getHasChildren(),
-                profile.getHasPets(),
-                profile.getHasVehicle(),
-                profile.getHasDisabledMember(),
-                profile.getWillingToRenovate(),
-                profile.getMinSizeM2(),
-                profile.getMinBedrooms(),
-                profile.getBudgetMax(),
-                profile.getCommuteImportance()
+                profile.getHouseholdType() != null ? profile.getHouseholdType().getDisplayName() : "Belirtilmemiş",
+                profile.getLifestylePreference() != null ? profile.getLifestylePreference().getDisplayName() : "Belirtilmemiş",
+                profile.getPriority() != null ? profile.getPriority().getDisplayName() : "Belirtilmemiş",
+                profile.getBudgetSensitivity() != null ? profile.getBudgetSensitivity().getDisplayName() : "Belirtilmemiş",
+                profile.getPurchaseIntent() != null ? profile.getPurchaseIntent().getDisplayName() : "Belirtilmemiş",
+                profile.getAgeGroup() != null ? profile.getAgeGroup().getDisplayName() : "Belirtilmemiş",
+                booleanToTurkish(profile.getHasChildren()),
+                booleanToTurkish(profile.getHasPets()),
+                booleanToTurkish(profile.getHasVehicle()),
+                booleanToTurkish(profile.getHasDisabledMember()),
+                booleanToTurkish(profile.getWillingToRenovate()),
+                profile.getMinSizeM2() != null ? profile.getMinSizeM2() : "Belirtilmemiş",
+                profile.getMinBedrooms() != null ? profile.getMinBedrooms() : "Belirtilmemiş",
+                profile.getBudgetMax() != null ? "₺" + profile.getBudgetMax().toPlainString() : "Belirtilmemiş",
+                profile.getCommuteImportance() != null ? profile.getCommuteImportance().getDisplayName() : "Belirtilmemiş"
         );
     }
 
     private String buildScoresSummary(SimpleEvaluationDto simpleEval) {
         StringBuilder sb = new StringBuilder();
-        sb.append("- Overall: %.1f/100 — %s%n".formatted(simpleEval.totalScore(), simpleEval.verdict()));
+        sb.append("- Genel Skor: %.1f/100 — %s%n".formatted(simpleEval.totalScore(), simpleEval.verdict()));
         for (CategoryScoreDto cat : simpleEval.categoryScores()) {
             sb.append("- %s: %.0f/100 — %s%n".formatted(cat.categoryName(), cat.score(), cat.verdict()));
             for (String factor : cat.factors()) {
@@ -107,5 +112,10 @@ public class EnhancedEvaluationPromptBuilder {
             }
         }
         return sb.toString();
+    }
+
+    private String booleanToTurkish(Boolean value) {
+        if (value == null) return "Belirtilmemiş";
+        return value ? "Evet" : "Hayır";
     }
 }
