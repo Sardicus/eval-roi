@@ -13,11 +13,10 @@ function Navbar() {
   const navLink = (path, label) => (
     <button
       onClick={() => navigate(path)}
-      className={`text-sm font-medium transition-colors relative pb-0.5 ${
-        location.pathname === path
+      className={`text-sm font-medium transition-colors relative pb-0.5 ${location.pathname === path
           ? "text-amber-400"
           : "text-[#8a9ab5] hover:text-white"
-      }`}
+        }`}
     >
       {label}
       {location.pathname === path && (
@@ -38,6 +37,7 @@ function Navbar() {
       <div className="flex items-center gap-8">
         {navLink("/listings", "Listings")}
         {navLink("/add-listing", "Add Listing")}
+        {navLink("/profiles", "Profiles")}
       </div>
 
       <button

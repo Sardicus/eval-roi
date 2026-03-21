@@ -1,12 +1,12 @@
 package com.naira.evalroi.controller;
 
-import com.naira.evalroi.enums.HeatingType;
-import com.naira.evalroi.enums.ListingStatus;
-import com.naira.evalroi.enums.PropertyType;
+import com.naira.evalroi.enums.*;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -39,5 +39,27 @@ public class EnumController {
             types.put(type.name(), type.getDisplayName());
         }
         return types;
+    }
+
+    @GetMapping("/buyer-profile-enums")
+    public ResponseEntity<Map<String, Map<String, String>>> getBuyerProfileEnums() {
+        Map<String, Map<String, String>> enums = new LinkedHashMap<>();
+
+        enums.put("householdType", Arrays.stream(HouseholdType.values())
+                .collect(LinkedHashMap::new, (m, e) -> m.put(e.name(), e.getDisplayName()), Map::putAll));
+        enums.put("lifestylePreference", Arrays.stream(LifestylePreference.values())
+                .collect(LinkedHashMap::new, (m, e) -> m.put(e.name(), e.getDisplayName()), Map::putAll));
+        enums.put("priority", Arrays.stream(Priority.values())
+                .collect(LinkedHashMap::new, (m, e) -> m.put(e.name(), e.getDisplayName()), Map::putAll));
+        enums.put("budgetSensitivity", Arrays.stream(BudgetSensitivity.values())
+                .collect(LinkedHashMap::new, (m, e) -> m.put(e.name(), e.getDisplayName()), Map::putAll));
+        enums.put("purchaseIntent", Arrays.stream(PurchaseIntent.values())
+                .collect(LinkedHashMap::new, (m, e) -> m.put(e.name(), e.getDisplayName()), Map::putAll));
+        enums.put("ageGroup", Arrays.stream(AgeGroup.values())
+                .collect(LinkedHashMap::new, (m, e) -> m.put(e.name(), e.getDisplayName()), Map::putAll));
+        enums.put("commuteImportance", Arrays.stream(CommuteImportance.values())
+                .collect(LinkedHashMap::new, (m, e) -> m.put(e.name(), e.getDisplayName()), Map::putAll));
+
+        return ResponseEntity.ok(enums);
     }
 }

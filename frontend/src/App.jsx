@@ -6,13 +6,14 @@ import AddListingPage from './Components/AddListingPage'
 import EditListingPage from './Components/EditListingPage'
 import ListingDetailPage from './Components/ListingDetailPage'
 import ProtectedRoute from './Components/ProtectedRoute'
+import ProfilesPage from './Components/ProfilesPage'
 import Navbar from './Components/Navbar'
 
 const App = () => {
   return (
     <Routes>
       <Route path="/" element={
-          <Login />
+        <Login />
       } />
       <Route path="/listings" element={
         <ProtectedRoute>
@@ -32,6 +33,11 @@ const App = () => {
       <Route path="/listing/:id" element={
         <ProtectedRoute>
           <><Navbar /><ListingDetailPage /></>
+        </ProtectedRoute>
+      } />
+      <Route path="/profiles" element={
+        <ProtectedRoute>
+          <><Navbar /><ProfilesPage /></>
         </ProtectedRoute>
       } />
     </Routes>
