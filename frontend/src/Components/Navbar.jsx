@@ -14,8 +14,8 @@ function Navbar() {
     <button
       onClick={() => navigate(path)}
       className={`text-sm font-medium transition-colors relative pb-0.5 ${location.pathname === path
-          ? "text-amber-400"
-          : "text-[#8a9ab5] hover:text-white"
+        ? "text-amber-400"
+        : "text-[#8a9ab5] hover:text-white"
         }`}
     >
       {label}
@@ -38,6 +38,7 @@ function Navbar() {
         {navLink("/listings", "Listings")}
         {navLink("/add-listing", "Add Listing")}
         {navLink("/profiles", "Profiles")}
+        {navLink("/fraud-check", "Fraud Analysis")}
       </div>
 
       <button

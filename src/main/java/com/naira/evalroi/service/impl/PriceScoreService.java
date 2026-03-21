@@ -1,8 +1,6 @@
 package com.naira.evalroi.service.impl;
 
 import com.naira.evalroi.dto.evaluation.simple.CategoryScoreDto;
-import com.naira.evalroi.entity.City;
-import com.naira.evalroi.entity.District;
 import com.naira.evalroi.entity.Listing;
 import com.naira.evalroi.repository.CityRepository;
 import com.naira.evalroi.repository.DistrictRepository;
@@ -12,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +17,7 @@ public class PriceScoreService implements ScoringStrategy {
 
     private final DistrictRepository districtRepository;
     private final CityRepository cityRepository;
+    private final FraudDetectionService fraudDetectionService;
 
     @Override
     public String getCategoryName() {
@@ -69,19 +67,7 @@ public class PriceScoreService implements ScoringStrategy {
     }
 
     private BigDecimal getAvgPricePerM2(String districtName, String cityName) {
-        if (districtName != null) {
-            Optional<District> district = districtRepository.findByName(districtName);
-            if (district.isPresent() && district.get().getAvgPricePerM2() != null) {
-                return district.get().getAvgPricePerM2();
-            }
-        }
-        if (cityName != null) {
-            Optional<City> city = cityRepository.findByName(cityName);
-            if (city.isPresent() && city.get().getAvgPricePerM2() != null) {
-                return city.get().getAvgPricePerM2();
-            }
-        }
-        return null;
+      return fraudDetectionService.getAvgPricePerM2(districtName, cityName);
     }
 
     @Override

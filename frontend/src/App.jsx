@@ -8,6 +8,7 @@ import ListingDetailPage from './Components/ListingDetailPage'
 import ProtectedRoute from './Components/ProtectedRoute'
 import ProfilesPage from './Components/ProfilesPage'
 import Navbar from './Components/Navbar'
+import FraudCheckPage from './Components/FraudCheckPage'
 
 const App = () => {
   return (
@@ -38,6 +39,11 @@ const App = () => {
       <Route path="/profiles" element={
         <ProtectedRoute>
           <><Navbar /><ProfilesPage /></>
+        </ProtectedRoute>
+      } />
+       <Route path="/fraud-check" element={
+        <ProtectedRoute>
+          <><Navbar /><FraudCheckPage /></>
         </ProtectedRoute>
       } />
     </Routes>
