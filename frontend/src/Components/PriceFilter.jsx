@@ -8,15 +8,17 @@ export default function PriceFilter({
     min = 0,
     max = 50000000,
 }) {
+    // Yerel state'ler (Apply butonuna basana kadar dışarıyı etkilemez)
     const [localMin, setLocalMin] = useState(minPrice ?? min);
     const [localMax, setLocalMax] = useState(maxPrice ?? max);
     const trackRef = useRef(null);
     const dragging = useRef(null);
 
+    // Dışarıdan gelen prop değişikliklerini takip et
     useEffect(() => {
         setLocalMin(minPrice ?? min);
         setLocalMax(maxPrice ?? max);
-    }, [minPrice, maxPrice]);
+    }, [minPrice, maxPrice, min, max]);
 
     const getPercent = (value) => ((value - min) / (max - min)) * 100;
 
@@ -26,21 +28,26 @@ export default function PriceFilter({
         const rect = track.getBoundingClientRect();
         const percent = Math.min(Math.max((clientX - rect.left) / rect.width, 0), 1);
         const raw = min + percent * (max - min);
+        // 100.000'er basamaklarla yuvarla
         return Math.round(raw / 100000) * 100000;
     }, [min, max]);
 
+    // Mouse ve Touch olaylarını yöneten Effect
     useEffect(() => {
         const onMouseMove = (e) => {
             if (!dragging.current) return;
             const val = getValueFromClientX(e.clientX);
             if (dragging.current === "min") {
-                setLocalMin(prev => Math.min(val, prev === localMax ? localMax - 100000 : localMax - 100000));
+                // Minimum değer maksimumun 100k altını geçemez
+                setLocalMin(Math.min(val, localMax - 100000));
             } else {
-                setLocalMax(prev => Math.max(val, localMin + 100000));
+                // Maksimum değer minimumun 100k üstünü geçemez
+                setLocalMax(Math.max(val, localMin + 100000));
             }
         };
 
         const onMouseUp = () => { dragging.current = null; };
+
         const onTouchMove = (e) => {
             if (!dragging.current) return;
             const val = getValueFromClientX(e.touches[0].clientX);
@@ -53,8 +60,9 @@ export default function PriceFilter({
 
         window.addEventListener("mousemove", onMouseMove);
         window.addEventListener("mouseup", onMouseUp);
-        window.addEventListener("touchmove", onTouchMove, { passive: true });
+        window.addEventListener("touchmove", onTouchMove, { passive: false });
         window.addEventListener("touchend", onMouseUp);
+
         return () => {
             window.removeEventListener("mousemove", onMouseMove);
             window.removeEventListener("mouseup", onMouseUp);
@@ -75,17 +83,27 @@ export default function PriceFilter({
         }
     }, [localMin, localMax, getValueFromClientX]);
 
+    // Input değişimi için yardımcı fonksiyon (Sadece rakamları alır)
+    const handleInputChange = (value, type) => {
+        const numericValue = Number(value.replace(/\D/g, ""));
+        if (type === "min") {
+            setLocalMin(numericValue);
+        } else {
+            setLocalMax(numericValue);
+        }
+    };
+
     const minPercent = getPercent(localMin);
     const maxPercent = getPercent(localMax);
 
     return (
         <div className="p-4 bg-[#0f172a] border border-[#334155] rounded-xl flex flex-col gap-4">
-            <label className="text-xs font-semibold uppercase tracking-widest text-[#64748b]">Price Range</label>
+            <label className="text-xs font-semibold uppercase tracking-widest text-[#64748b]">Fiyat Aralığı</label>
 
-            {/* Slider track area */}
+            {/* Kaydırıcı (Slider) Alanı */}
             <div className="relative" style={{ height: "32px", margin: "0 11px" }}>
 
-                {/* Clickable track */}
+                {/* Tıklanabilir İz */}
                 <div
                     ref={trackRef}
                     onClick={handleTrackClick}
@@ -101,7 +119,7 @@ export default function PriceFilter({
                     }}
                 />
 
-                {/* Amber fill */}
+                {/* Seçili Alan (Amber Rengi) */}
                 <div
                     className="absolute pointer-events-none rounded-full"
                     style={{
@@ -114,7 +132,7 @@ export default function PriceFilter({
                     }}
                 />
 
-                {/* Min thumb */}
+                {/* Min Thumb (Sol Buton) */}
                 <div
                     onMouseDown={(e) => { e.preventDefault(); dragging.current = "min"; }}
                     onTouchStart={() => { dragging.current = "min"; }}
@@ -132,7 +150,7 @@ export default function PriceFilter({
                     }}
                 />
 
-                {/* Max thumb */}
+                {/* Max Thumb (Sağ Buton) */}
                 <div
                     onMouseDown={(e) => { e.preventDefault(); dragging.current = "max"; }}
                     onTouchStart={() => { dragging.current = "max"; }}
@@ -151,40 +169,46 @@ export default function PriceFilter({
                 />
             </div>
 
-            {/* Track labels */}
+            {/* Alt Bilgi Etiketleri */}
             <div className="flex justify-between text-xs text-[#64748b] -mt-2">
-                <span>₺{min.toLocaleString()}</span>
-                <span>₺{max.toLocaleString()}</span>
+                <span>₺{min.toLocaleString('tr-TR')}</span>
+                <span>₺{max.toLocaleString('tr-TR')}</span>
             </div>
 
-            {/* Inputs + Apply */}
+            {/* Inputlar ve Uygula Butonu */}
             <div className="flex gap-2 items-center">
                 <div className="flex-1 bg-[#1e293b] border border-[#334155] rounded-lg px-3 py-2">
                     <p className="text-xs text-[#64748b] mb-0.5">Min</p>
                     <input
                         type="text"
-                        value={localMin === min ? "" : localMin.toLocaleString("tr-TR")}
-                        onChange={(e) => setLocalMin(Number(e.target.value.replace(/[^\d]/g, "")) || min)}
-                        placeholder="Any"
+                        value={localMin === 0 && min === 0 ? "" : localMin.toLocaleString("tr-TR")}
+                        onChange={(e) => handleInputChange(e.target.value, "min")}
+                        placeholder="Min"
                         className="w-full bg-transparent text-white text-sm font-semibold outline-none placeholder-[#64748b]"
                     />
                 </div>
                 <span className="text-[#334155] text-lg">—</span>
                 <div className="flex-1 bg-[#1e293b] border border-[#334155] rounded-lg px-3 py-2">
-                    <p className="text-xs text-[#64748b] mb-0.5">Max</p>
+                    <p className="text-xs text-[#64748b] mb-0.5">Maks</p>
                     <input
                         type="text"
                         value={localMax === max ? "" : localMax.toLocaleString("tr-TR")}
-                        onChange={(e) => setLocalMax(Number(e.target.value.replace(/[^\d]/g, "")) || max)}
-                        placeholder="Any"
+                        onChange={(e) => handleInputChange(e.target.value, "max")}
+                        placeholder="Maks"
                         className="w-full bg-transparent text-white text-sm font-semibold outline-none placeholder-[#64748b]"
                     />
                 </div>
                 <button
-                    onClick={() => { setMinPrice(localMin); setMaxPrice(localMax); }}
+                    onClick={() => { 
+                        // Uygularken son bir mantık kontrolü
+                        const finalMin = Math.min(localMin, localMax);
+                        const finalMax = Math.max(localMin, localMax);
+                        setMinPrice(finalMin); 
+                        setMaxPrice(finalMax); 
+                    }}
                     className="px-4 py-3 bg-amber-400 hover:bg-amber-300 text-[#0f172a] font-bold rounded-lg text-sm transition-colors"
                 >
-                    Apply
+                    Uygula
                 </button>
             </div>
         </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useEnums } from "../hooks/useEnums.js";
 import AIAnalysisCard from "./AIAnalysisCard";
+import { securedFetch } from "../utils/api"; // Merkezi fetch aracını ekledik
 
 function ListingDetailPage() {
   const { id } = useParams();
@@ -12,31 +13,39 @@ function ListingDetailPage() {
   const [profiles, setProfiles] = useState([]);
   const { propertyTypes, heatingTypes, listingStatuses } = useEnums();
 
-  const token   = localStorage.getItem("token");
-  const headers = { "Authorization": `Bearer ${token}` };
-
   useEffect(() => {
     const fetchListing = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/listing/get/${id}`, { headers });
-        if (response.ok) setListing(await response.json());
-        else setError("Failed to load listing.");
-      } catch { setError("Could not connect to server."); }
-      finally { setLoading(false); }
+        // securedFetch kullanarak 401 kontrolünü otomatiğe bağladık
+        const response = await securedFetch(`http://localhost:8080/listing/get/${id}`);
+        if (response && response.ok) {
+          setListing(await response.json());
+        } else if (response) {
+          setError("İlan yüklenemedi.");
+        }
+      } catch {
+        setError("Sunucuya bağlanılamadı.");
+      } finally {
+        setLoading(false);
+      }
     };
 
     const fetchProfiles = async () => {
       try {
-        const response = await fetch("http://localhost:8080/buyer-profile/getAll", { headers });
-        if (response.ok) setProfiles(await response.json());
-      } catch { console.error("Failed to fetch profiles"); }
+        const response = await securedFetch("http://localhost:8080/buyer-profile/getAll");
+        if (response && response.ok) {
+          setProfiles(await response.json());
+        }
+      } catch {
+        console.error("Profiller alınamadı");
+      }
     };
 
     fetchListing();
     fetchProfiles();
   }, [id]);
 
-  if (loading) return <div className="min-h-screen bg-[#0f172a] p-8 text-[#94a3b8]">Loading...</div>;
+  if (loading) return <div className="min-h-screen bg-[#0f172a] p-8 text-[#94a3b8]">Yükleniyor...</div>;
   if (error)   return <div className="min-h-screen bg-[#0f172a] p-8 text-red-400">{error}</div>;
   if (!listing) return null;
 
@@ -48,22 +57,22 @@ function ListingDetailPage() {
     <div className="min-h-screen bg-[#0f172a] p-8">
       <div className="max-w-4xl mx-auto">
 
-        {/* Back button */}
+        {/* Geri Butonu */}
         <button
           onClick={() => navigate("/listings")}
           className="mb-6 text-[#94a3b8] hover:text-amber-400 transition-colors text-sm flex items-center gap-2"
         >
-          ← Back to Listings
+          ← İlanlara Dön
         </button>
 
-        {/* Image */}
+        {/* Görsel Alanı */}
         <div className="relative h-80 bg-[#0f172a] rounded-2xl mb-6 overflow-hidden flex items-center justify-center border border-[#334155]">
           {listing.primaryImageUrl
             ? <>
                 <img src={`http://localhost:8080${listing.primaryImageUrl}`} alt={listing.title} className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-transparent to-transparent opacity-60" />
               </>
-            : <span className="text-[#334155]">No Image</span>
+            : <span className="text-[#334155]">Görsel Yok</span>
           }
           <span className={`absolute top-4 right-4 text-xs font-bold px-3 py-1 rounded-full border backdrop-blur-sm ${
             listing.status === "ACTIVE" ? "bg-emerald-900/80 text-emerald-400 border-emerald-400/20" :
@@ -74,25 +83,25 @@ function ListingDetailPage() {
           </span>
         </div>
 
-        {/* Header */}
+        {/* Başlık ve Fiyat */}
         <div className="flex items-start justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold text-white mb-1">{listing.title}</h1>
             <p className="text-[#94a3b8]">{listing.address.district}, {listing.address.city}</p>
           </div>
           <div className="text-right">
-            <p className="text-3xl font-bold text-amber-400">₺{listing.price.toLocaleString()}</p>
+            <p className="text-3xl font-bold text-amber-400">₺{listing.price.toLocaleString('tr-TR')}</p>
           </div>
         </div>
 
-        {/* Key Info Bar */}
+        {/* Önemli Bilgi Çubuğu */}
         <div className="grid grid-cols-5 gap-4 bg-[#1e293b] border border-[#334155] rounded-2xl p-4 mb-6 text-center">
           {[
-            { value: listing.sizeM2,                                      label: "m²" },
-            { value: listing.bedroomCount  ?? "-",                        label: "Bedrooms" },
-            { value: listing.bathroomCount ?? "-",                        label: "Bathrooms" },
-            { value: listing.roomCount     ?? "-",                        label: "Rooms" },
-            { value: `${listing.floorNumber ?? "-"}/${listing.totalFloors ?? "-"}`, label: "Floor" },
+            { value: listing.sizeM2,                                         label: "m²" },
+            { value: listing.bedroomCount  ?? "-",                         label: "Yatak Odası" },
+            { value: listing.bathroomCount ?? "-",                         label: "Banyo" },
+            { value: listing.roomCount     ?? "-",                         label: "Oda Sayısı" },
+            { value: `${listing.floorNumber ?? "-"}/${listing.totalFloors ?? "-"}`, label: "Kat" },
           ].map(({ value, label }) => (
             <div key={label} className="border-r border-[#334155] last:border-0">
               <p className="text-2xl font-bold text-white">{value}</p>
@@ -103,16 +112,16 @@ function ListingDetailPage() {
 
         <div className="grid grid-cols-2 gap-6">
 
-          {/* Property Info */}
+          {/* Gayrimenkul Bilgileri */}
           <div className={cardClass}>
-            <h2 className="text-white font-semibold text-lg mb-4">Property Info</h2>
+            <h2 className="text-white font-semibold text-lg mb-4">Emlak Bilgileri</h2>
             <div className="space-y-3">
               {[
-                { label: "Type",        value: propertyTypes[listing.propertyType] || listing.propertyType },
-                { label: "Build Year",  value: listing.buildYear    ?? "-" },
-                { label: "Living Area", value: listing.livingAreaM2 ? `${listing.livingAreaM2} m²` : "-" },
-                { label: "Heating",     value: heatingTypes[listing.heatingType] || listing.heatingType },
-                { label: "Total Floors",value: listing.totalFloors  ?? "-" },
+                { label: "Tip",         value: propertyTypes[listing.propertyType] || listing.propertyType },
+                { label: "Bina Yaşı",   value: listing.buildYear    ?? "-" },
+                { label: "Net Alan",    value: listing.livingAreaM2 ? `${listing.livingAreaM2} m²` : "-" },
+                { label: "Isınma",      value: heatingTypes[listing.heatingType] || listing.heatingType },
+                { label: "Toplam Kat",  value: listing.totalFloors  ?? "-" },
               ].map(({ label, value }) => (
                 <div key={label} className="flex justify-between border-b border-[#334155] pb-2 last:border-0 last:pb-0">
                   <span className={labelClass}>{label}</span>
@@ -122,37 +131,37 @@ function ListingDetailPage() {
             </div>
           </div>
 
-          {/* Features */}
+          {/* Özellikler */}
           <div className={cardClass}>
-            <h2 className="text-white font-semibold text-lg mb-4">Features</h2>
+            <h2 className="text-white font-semibold text-lg mb-4">Özellikler</h2>
             <div className="space-y-3">
               {[
-                { label: "Parking",   value: listing.hasParking },
-                { label: "Elevator",  value: listing.hasElevator },
-                { label: "Balcony",   value: listing.hasBalcony },
-                { label: "Garden",    value: listing.hasGarden },
-                { label: "Furnished", value: listing.isFurnished },
+                { label: "Otopark",   value: listing.hasParking },
+                { label: "Asansör",   value: listing.hasElevator },
+                { label: "Balkon",    value: listing.hasBalcony },
+                { label: "Bahçe",     value: listing.hasGarden },
+                { label: "Eşyalı",    value: listing.isFurnished },
               ].map(({ label, value }) => (
                 <div key={label} className="flex justify-between border-b border-[#334155] pb-2 last:border-0 last:pb-0">
                   <span className={labelClass}>{label}</span>
                   <span className={value ? "text-emerald-400 font-medium" : "text-red-400"}>
-                    {value ? "✓ Yes" : "✗ No"}
+                    {value ? "✓ Evet" : "✗ Hayır"}
                   </span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Address */}
+          {/* Adres Bilgileri */}
           <div className={cardClass}>
-            <h2 className="text-white font-semibold text-lg mb-4">Address</h2>
+            <h2 className="text-white font-semibold text-lg mb-4">Adres</h2>
             <div className="space-y-3">
               {[
-                { label: "Street",       value: listing.address.street },
-                { label: "Neighborhood", value: listing.address.neighborhood },
-                { label: "District",     value: listing.address.district },
-                { label: "City",         value: listing.address.city },
-                { label: "Zip Code",     value: listing.address.zipCode },
+                { label: "Sokak/Cadde",  value: listing.address.street },
+                { label: "Mahalle",      value: listing.address.neighborhood },
+                { label: "İlçe",         value: listing.address.district },
+                { label: "Şehir",        value: listing.address.city },
+                { label: "Posta Kodu",   value: listing.address.zipCode },
               ].map(({ label, value }) => (
                 <div key={label} className="flex justify-between border-b border-[#334155] pb-2 last:border-0 last:pb-0">
                   <span className={labelClass}>{label}</span>
@@ -162,31 +171,30 @@ function ListingDetailPage() {
             </div>
           </div>
 
-          {/* Description */}
+          {/* Açıklama */}
           <div className={cardClass}>
-            <h2 className="text-white font-semibold text-lg mb-4">Description</h2>
-            <p className="text-[#94a3b8] leading-relaxed">{listing.description || "No description provided."}</p>
+            <h2 className="text-white font-semibold text-lg mb-4">Açıklama</h2>
+            <p className="text-[#94a3b8] leading-relaxed">{listing.description || "Açıklama belirtilmedi."}</p>
           </div>
 
         </div>
 
-        {/* AI Analysis Card */}
+        {/* AI Analiz Kartı */}
         <div className="mt-6">
           <AIAnalysisCard
             listingId={id}
             listing={listing}
             profiles={profiles}
-            headers={headers}
           />
         </div>
 
-        {/* Actions */}
+        {/* İşlemler */}
         <div className="mt-6 flex gap-4">
           <button
             onClick={() => navigate(`/edit-listing/${listing.id}`)}
             className="px-6 py-2.5 bg-amber-400 hover:bg-amber-300 text-[#0f172a] font-bold rounded-xl transition-colors text-sm"
           >
-            Edit Listing
+            İlanı Düzenle
           </button>
         </div>
 

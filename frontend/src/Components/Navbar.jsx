@@ -35,17 +35,17 @@ function Navbar() {
       </h1>
 
       <div className="flex items-center gap-8">
-        {navLink("/listings", "Listings")}
-        {navLink("/add-listing", "Add Listing")}
-        {navLink("/profiles", "Profiles")}
-        {navLink("/fraud-check", "Fraud Analysis")}
+        {navLink("/listings", "İlanlar")}
+        {navLink("/add-listing", "İlan Ekle")}
+        {navLink("/profiles", "Profiller")}
+        {navLink("/fraud-check", "Analiz & Denetim")}
       </div>
 
       <button
         onClick={handleLogout}
         className="px-4 py-2 bg-[#1a2540] border border-[#2a3a5c] text-[#8a9ab5] hover:text-white hover:border-amber-400/40 rounded-xl text-sm font-medium transition-all"
       >
-        Logout
+        Çıkış Yap
       </button>
     </nav>
   );

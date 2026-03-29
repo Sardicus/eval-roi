@@ -1,10 +1,210 @@
-import React, { useState } from "react";
-import { useNavigate } from 'react-router-dom'
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
+import { usePageTitle } from '../hooks/usePageTitle';
+import {
+  Shield, TrendingUp, Thermometer, MapPin,
+  ChevronRight, Zap, Eye, EyeOff, Loader2,
+  BarChart3, Activity, ArrowRight
+} from "lucide-react";
 
+// ─── Animated Market Pulse Ticker ───────────────────────────────────────────
+const TICKER_ITEMS = [
+  { label: "İzmir Ort. m²", value: "₺52.400", delta: "+%3,2", up: true },
+  { label: "İstanbul Ort. m²", value: "₺89.200", delta: "+%1,8", up: true },
+  { label: "Bursa Ort. m²", value: "₺38.600", delta: "-%0,4", up: false },
+  { label: "Ankara Ort. m²", value: "₺41.100", delta: "+%2,1", up: true },
+  { label: "Antalya Ort. m²", value: "₺67.800", delta: "+%5,6", up: true },
+  { label: "Risk Endeksi TR", value: "0.34", delta: "DÜŞÜK", up: true },
+];
+
+function MarketTicker() {
+  return (
+    <div className="relative overflow-hidden border-y border-white/5 py-2 bg-black/20 backdrop-blur-sm">
+      <motion.div
+        className="flex gap-8 whitespace-nowrap"
+        animate={{ x: ["0%", "-50%"] }}
+        transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
+      >
+        {[...TICKER_ITEMS, ...TICKER_ITEMS].map((item, i) => (
+          <div key={i} className="flex items-center gap-2 shrink-0">
+            <Activity className="w-3 h-3 text-amber-400/60" />
+            <span className="text-[#64748b] text-xs font-mono">{item.label}</span>
+            <span className="text-white text-xs font-bold font-mono">{item.value}</span>
+            <span className={`text-xs font-mono font-semibold ${item.up ? "text-emerald-400" : "text-red-400"}`}>
+              {item.delta}
+            </span>
+            <span className="text-[#334155] mx-2">│</span>
+          </div>
+        ))}
+      </motion.div>
+    </div>
+  );
+}
+
+// ─── Animated Scan Grid Background ──────────────────────────────────────────
+function ScanGrid() {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div
+        className="absolute inset-0 opacity-[0.04]"
+        style={{
+          backgroundImage: `linear-gradient(rgba(251,191,36,0.5) 1px, transparent 1px),
+                            linear-gradient(90deg, rgba(251,191,36,0.5) 1px, transparent 1px)`,
+          backgroundSize: "48px 48px",
+        }}
+      />
+      <motion.div
+        className="absolute left-0 right-0 h-px"
+        style={{ background: "linear-gradient(90deg, transparent, rgba(251,191,36,0.3), transparent)" }}
+        animate={{ top: ["0%", "100%"] }}
+        transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+      />
+      {[...Array(6)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute w-1 h-1 rounded-full bg-amber-400/40"
+          style={{
+            left: `${15 + i * 14}%`,
+            top: `${20 + (i % 3) * 25}%`,
+          }}
+          animate={{ opacity: [0.2, 0.8, 0.2], scale: [1, 1.6, 1] }}
+          transition={{ duration: 2 + i * 0.5, repeat: Infinity, delay: i * 0.3 }}
+        />
+      ))}
+      <div className="absolute top-0 left-0 w-96 h-96 rounded-full opacity-10 blur-3xl"
+        style={{ background: "radial-gradient(circle, #f59e0b 0%, transparent 70%)" }} />
+      <div className="absolute bottom-0 right-0 w-72 h-72 rounded-full opacity-8 blur-3xl"
+        style={{ background: "radial-gradient(circle, #3b82f6 0%, transparent 70%)" }} />
+    </div>
+  );
+}
+
+// ─── Feature Cards ───────────────────────────────────────────────────────────
+const FEATURES = [
+  {
+    icon: Shield,
+    title: "Bina Güvenlik Skoru",
+    desc: "Deprem riski, yapım yılı ve yapısal analiz",
+    accent: "#f59e0b",
+    value: "94/100",
+  },
+  {
+    icon: TrendingUp,
+    title: "Fiyat Zekası",
+    desc: "İlçe ve şehir ortalamaları ile karşılaştırma",
+    accent: "#34d399",
+    value: "↓%12",
+  },
+  {
+    icon: Thermometer,
+    title: "Konfor Analizi",
+    desc: "Isınma verimliliği ve konum bazlı skorlama",
+    accent: "#60a5fa",
+    value: "B+",
+  },
+  {
+    icon: MapPin,
+    title: "Lokasyon Analizi",
+    desc: "Risk bölgeleri ve sosyal olanak skorlaması",
+    accent: "#a78bfa",
+    value: "Bölge 2",
+  },
+];
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 24, filter: "blur(4px)" },
+  visible: (i) => ({
+    opacity: 1, y: 0, filter: "blur(0px)",
+    transition: { delay: 0.3 + i * 0.1, duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+  }),
+};
+
+function FeatureCard({ feature, index }) {
+  const Icon = feature.icon;
+  return (
+    <motion.div
+      custom={index}
+      variants={cardVariants}
+      initial="hidden"
+      animate="visible"
+      whileHover={{ y: -3, scale: 1.02 }}
+      className="relative group p-4 rounded-xl border border-white/5 bg-white/[0.03] backdrop-blur-sm overflow-hidden cursor-default"
+      style={{ transition: "box-shadow 0.3s" }}
+    >
+      <div
+        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"
+        style={{ background: `radial-gradient(circle at 50% 0%, ${feature.accent}18 0%, transparent 60%)` }}
+      />
+      <div className="flex items-start justify-between mb-2">
+        <div className="p-1.5 rounded-lg" style={{ background: `${feature.accent}18` }}>
+          <Icon className="w-4 h-4" style={{ color: feature.accent }} />
+        </div>
+        <span className="font-mono text-xs font-bold" style={{ color: feature.accent }}>
+          {feature.value}
+        </span>
+      </div>
+      <p className="text-white text-sm font-semibold mb-0.5">{feature.title}</p>
+      <p className="text-[#475569] text-xs leading-relaxed">{feature.desc}</p>
+    </motion.div>
+  );
+}
+
+// ─── Smart Input ─────────────────────────────────────────────────────────────
+function SmartInput({ label, type = "text", placeholder, value, onChange, onKeyDown, required, icon: Icon, autoComplete }) {
+  const [focused, setFocused] = useState(false);
+  const [showPass, setShowPass] = useState(false);
+  const isPassword = type === "password";
+  const inputType = isPassword ? (showPass ? "text" : "password") : type;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="relative"
+    >
+      <motion.div
+        animate={{
+          borderColor: focused ? "rgba(251,191,36,0.6)" : "rgba(51,65,85,0.8)",
+          boxShadow: focused ? "0 0 0 1px rgba(251,191,36,0.2), 0 0 16px rgba(251,191,36,0.08)" : "none",
+        }}
+        transition={{ duration: 0.2 }}
+        className="flex items-center gap-3 px-4 py-3 rounded-xl border bg-[#0f172a]/80 backdrop-blur-sm"
+      >
+        {Icon && <Icon className={`w-4 h-4 shrink-0 transition-colors duration-200 ${focused ? "text-amber-400" : "text-[#334155]"}`} />}
+        <input
+          type={inputType}
+          placeholder={placeholder}
+          required={required}
+          value={value}
+          autoComplete={autoComplete}
+          onChange={onChange}
+          onKeyDown={onKeyDown}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          className="flex-1 bg-transparent text-white placeholder-[#334155] text-sm outline-none"
+        />
+        {isPassword && (
+          <button
+            type="button"
+            onClick={() => setShowPass(!showPass)}
+            className="text-[#334155] hover:text-amber-400 transition-colors"
+          >
+            {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          </button>
+        )}
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 function LoginForm() {
+  usePageTitle("Gayrimenkul Zekası"); 
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const [registerData, setRegisterData] = useState({
@@ -15,245 +215,439 @@ function LoginForm() {
     loginWith: "0", username: "", email: "", password: "",
   });
 
+  const containsSpace = (val) => /\s/.test(val);
+  const blockSpace = (e) => { if (e.key === " ") e.preventDefault(); };
+
   const handleRegister = async (e) => {
     e.preventDefault();
-    setMessage(""); setError("");
+    setMessage(""); setError(""); setLoading(true);
+
+    const fields = { username: registerData.username, email: registerData.email, password: registerData.password };
+    if (Object.values(fields).some(containsSpace)) {
+      setError("Alanlar boşluk içeremez.");
+      setLoading(false); return;
+    }
+    if (registerData.password !== registerData.confirmPassword) {
+      setError("Şifreler eşleşmiyor.");
+      setLoading(false); return;
+    }
+
     try {
-      const response = await fetch("http://localhost:8080/api/v1/auth/register", {
+      const registerResponse = await fetch("http://localhost:8080/api/v1/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(registerData),
+        body: JSON.stringify({
+          ...registerData,
+          username: registerData.username.trim(),
+          email: registerData.email.trim(),
+        }),
       });
-      if (response.ok) {
-        setMessage("Registration successful! You can now login.");
+
+      if (!registerResponse.ok) {
+        const data = await registerResponse.json();
+        setError(data.message || "Kayıt başarısız.");
+        setLoading(false); return;
+      }
+
+      const loginResponse = await fetch("http://localhost:8080/api/v1/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          loginWith: "0",
+          username: registerData.username.trim(),
+          password: registerData.password,
+        }),
+      });
+
+      if (loginResponse.ok) {
+        const data = await loginResponse.json();
+        localStorage.setItem("token", data.accessToken);
+        navigate("/listings");
       } else {
-        const data = await response.json();
-        setError(data.message || "Registration failed.");
+        setMessage("Hesap oluşturuldu! Lütfen giriş yapın.");
+        setIsLoginMode(true);
       }
     } catch (err) {
-      setError("Could not connect to server.");
+      setError("Sunucuya bağlanılamadı.");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setMessage(""); setError("");
+    setMessage(""); setError(""); setLoading(true);
+
+    const identifier = loginData.loginWith === "0" ? loginData.username : loginData.email;
+    if (containsSpace(identifier) || containsSpace(loginData.password)) {
+      setError("Alanlar boşluk içeremez.");
+      setLoading(false); return;
+    }
+
     try {
       const response = await fetch("http://localhost:8080/api/v1/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(loginData),
+        body: JSON.stringify({
+          ...loginData,
+          username: loginData.username.trim(),
+          email: loginData.email.trim(),
+        }),
       });
+
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem("token", data.accessToken);
         navigate("/listings");
       } else {
         const data = await response.json();
-        setError(data.message || "Login failed.");
+        setError(data.message || "Geçersiz kimlik bilgileri.");
       }
     } catch (err) {
-      setError("Could not connect to server.");
+      setError("Sunucuya bağlanılamadı.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const inputClass = `w-full px-4 py-3 rounded-lg bg-[#1a2540] border border-[#2a3a5c] text-white placeholder-[#4a5a7c] outline-none focus:border-amber-400 transition-colors`;
-  const radioClass = `w-4 h-4 accent-amber-400 cursor-pointer`;
-
-  const features = [
-    { icon: "🏛️", title: "Building Safety Score", desc: "Earthquake risk, build year, structural analysis" },
-    { icon: "📊", title: "Price Intelligence", desc: "Compare against district & city averages" },
-    { icon: "🌡️", title: "Climate Comfort", desc: "Heating efficiency scored by location" },
-    { icon: "📍", title: "Location Analysis", desc: "District risk zones and amenity scoring" },
-  ];
+  const switchMode = (login) => {
+    setIsLoginMode(login);
+    setMessage("");
+    setError("");
+  };
 
   return (
-    <div className="min-h-screen bg-[#060e1a] flex">
+    <div className="min-h-screen bg-[#060e1a] flex flex-col">
 
-      {/* Left Side */}
-      <div className="hidden lg:flex flex-col justify-between w-[60%] p-16 relative overflow-hidden">
+      <MarketTicker />
 
-        {/* Background effects */}
-        <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-amber-400 opacity-5 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-blue-600 opacity-5 rounded-full translate-x-1/2 translate-y-1/2 blur-3xl pointer-events-none" />
+      <div className="flex flex-1">
 
-        {/* Grid pattern overlay */}
-        <div className="absolute inset-0 opacity-[0.03]"
-          style={{ backgroundImage: "linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
+        {/* ── Left Panel ─────────────────────────────────────────── */}
+        <motion.div
+          initial={{ opacity: 0, x: -30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="hidden lg:flex flex-col justify-between w-[58%] p-14 relative overflow-hidden"
+        >
+          <ScanGrid />
 
-        {/* Logo */}
-        <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">
-            Eval<span className="text-amber-400">ROI</span>
-          </h1>
-          <p className="text-[#4a5a7c] text-xs mt-1 tracking-widest uppercase">Property Intelligence Platform</p>
-        </div>
-
-        {/* Hero text */}
-        <div>
-          <p className="text-amber-400 text-sm font-semibold tracking-widest uppercase mb-4">Smart Property Evaluation</p>
-          <h2 className="text-5xl font-bold text-white leading-tight mb-6">
-            Know the True<br />
-            Value of Every<br />
-            <span className="text-amber-400">Property.</span>
-          </h2>
-          <p className="text-[#8a9ab5] text-lg leading-relaxed max-w-md">
-            AI-powered analysis across safety, price, location and comfort metrics — so you never overpay or overlook a risk.
-          </p>
-        </div>
-
-        {/* Feature highlights */}
-        <div className="grid grid-cols-2 gap-4">
-          {features.map((f) => (
-            <div key={f.title} className="bg-[#0f1f38] border border-[#1e3a6e] rounded-xl p-4">
-              <span className="text-2xl mb-2 block">{f.icon}</span>
-              <p className="text-white text-sm font-semibold mb-1">{f.title}</p>
-              <p className="text-[#4a5a7c] text-xs">{f.desc}</p>
+          <div className="relative z-10">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-amber-400/10 border border-amber-400/20 flex items-center justify-center">
+                <BarChart3 className="w-4 h-4 text-amber-400" />
+              </div>
+              <h1 className="text-xl font-black text-white tracking-tight">
+                Eval<span className="text-amber-400">ROI</span>
+              </h1>
             </div>
-          ))}
-        </div>
-
-      </div>
-
-      {/* Right Side - Auth Card */}
-      <div className="flex-1 flex items-center justify-center p-8 relative">
-        <div className="absolute inset-0 bg-[#0a1628] border-l border-[#1e3a6e]" />
-
-        <div className="relative w-full max-w-md">
-
-          {/* Mobile logo */}
-          <div className="text-center mb-8 lg:hidden">
-            <h1 className="text-3xl font-bold text-white tracking-tight">
-              Eval<span className="text-amber-400">ROI</span>
-            </h1>
-            <p className="text-[#4a5a7c] text-sm mt-1 tracking-widest uppercase">Property Intelligence</p>
+            <p className="text-[#334155] text-[10px] mt-1 tracking-[0.25em] uppercase font-semibold ml-10">
+              Gayrimenkul Zekası Platformu
+            </p>
           </div>
 
-          <div className="bg-[#0f1f38] border border-[#1e3a6e] rounded-2xl p-8 shadow-2xl">
+          <div className="relative z-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-amber-400/20 bg-amber-400/5 mb-6">
+              <Zap className="w-3 h-3 text-amber-400" />
+              <span className="text-amber-400 text-[11px] font-bold tracking-[0.15em] uppercase">Yapay Zeka Destekli Analiz</span>
+            </div>
 
-            <h3 className="text-white text-xl font-bold mb-1">
-              {isLoginMode ? "Welcome back" : "Create account"}
-            </h3>
-            <p className="text-[#4a5a7c] text-sm mb-6">
-              {isLoginMode ? "Sign in to your account" : "Start evaluating properties"}
+            <h2 className="text-[3.25rem] font-black text-white leading-[1.05] tracking-tight mb-5">
+              Her Mülkün <br />
+              <span className="text-transparent bg-clip-text"
+                style={{ backgroundImage: "linear-gradient(90deg, #f59e0b, #fcd34d)" }}>
+                Gerçek Değerini
+              </span><br />
+              Keşfedin.
+            </h2>
+
+            <p className="text-[#475569] text-base leading-relaxed max-w-sm">
+              Güvenlik, fiyat, konum ve konfor ekseninde çok boyutlu skorlama — Türkiye pazarı için özel geliştirildi.
             </p>
 
-            {/* Tab Controls */}
-            <div className="relative flex h-11 mb-6 bg-[#0a1628] rounded-xl overflow-hidden border border-[#1e3a6e]">
-              <button
-                className={`w-1/2 text-sm font-semibold transition-all z-10 ${isLoginMode ? "text-[#060e1a]" : "text-[#4a5a7c] hover:text-white"}`}
-                onClick={() => { setIsLoginMode(true); setMessage(""); setError(""); }}
-              >
-                Login
-              </button>
-              <button
-                className={`w-1/2 text-sm font-semibold transition-all z-10 ${!isLoginMode ? "text-[#060e1a]" : "text-[#4a5a7c] hover:text-white"}`}
-                onClick={() => { setIsLoginMode(false); setMessage(""); setError(""); }}
-              >
-                Sign Up
-              </button>
-              <div className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-lg bg-amber-400 transition-all duration-300 ${isLoginMode ? "left-1" : "left-[calc(50%+3px)]"}`} />
+            <div className="flex items-center gap-2 mt-4 text-[#334155] text-xs">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span>3 Şehir · 40+ İlçeden Canlı Veri</span>
+            </div>
+          </div>
+
+          <div className="relative z-10 grid grid-cols-2 gap-3">
+            {FEATURES.map((f, i) => (
+              <FeatureCard key={f.title} feature={f} index={i} />
+            ))}
+          </div>
+        </motion.div>
+
+        {/* ── Right Panel ────────────────────────────────────────── */}
+        <div className="flex-1 flex items-center justify-center p-6 lg:p-10 relative">
+          <div className="absolute inset-0 border-l border-white/[0.04]"
+            style={{ background: "linear-gradient(135deg, #080f1e 0%, #060e1a 100%)" }} />
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.15 }}
+            className="relative w-full max-w-[400px]"
+          >
+            <div className="text-center mb-8 lg:hidden">
+              <h1 className="text-3xl font-black text-white tracking-tight">
+                Eval<span className="text-amber-400">ROI</span>
+              </h1>
+              <p className="text-[#334155] text-[10px] mt-1 tracking-[0.2em] uppercase">Gayrimenkul Zekası</p>
             </div>
 
-            {/* Messages */}
-            {message && <p className="text-emerald-400 text-sm text-center mb-4 bg-emerald-400/10 rounded-lg py-2">{message}</p>}
-            {error && <p className="text-red-400 text-sm text-center mb-4 bg-red-400/10 rounded-lg py-2">{error}</p>}
+            <div className="relative rounded-2xl border border-white/[0.07] overflow-hidden"
+              style={{
+                background: "linear-gradient(145deg, rgba(15,23,42,0.9) 0%, rgba(8,15,30,0.95) 100%)",
+                backdropFilter: "blur(20px)",
+                boxShadow: "0 0 0 1px rgba(255,255,255,0.04), 0 32px 64px rgba(0,0,0,0.5), 0 0 80px rgba(251,191,36,0.04)",
+              }}
+            >
+              <div className="h-px w-full"
+                style={{ background: "linear-gradient(90deg, transparent, rgba(251,191,36,0.4), transparent)" }} />
 
-            {/* Login Form */}
-            {isLoginMode && (
-              <form className="space-y-4" onSubmit={handleLogin}>
-                <div className="flex gap-6">
-                  <label className="flex items-center gap-2 cursor-pointer text-[#8a9ab5] text-sm">
-                    <input type="radio" className={radioClass} name="loginWith" checked={loginData.loginWith === "0"}
-                      onChange={() => setLoginData({ ...loginData, loginWith: "0", email: "" })} />
-                    Username
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer text-[#8a9ab5] text-sm">
-                    <input type="radio" className={radioClass} name="loginWith" checked={loginData.loginWith === "1"}
-                      onChange={() => setLoginData({ ...loginData, loginWith: "1", username: "" })} />
-                    Email
-                  </label>
+              <div className="p-7">
+                <div className="relative flex h-10 mb-7 p-1 rounded-xl bg-[#0a1628]/80 border border-white/[0.06]">
+                  <motion.div
+                    layoutId="toggle-pill"
+                    className="absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-lg"
+                    style={{ background: "linear-gradient(135deg, #f59e0b, #fbbf24)" }}
+                    animate={{ left: isLoginMode ? "4px" : "calc(50% + 0px)" }}
+                    transition={{ type: "spring", stiffness: 400, damping: 35 }}
+                  />
+                  {["Giriş Yap", "Kayıt Ol"].map((label, i) => (
+                    <button
+                      key={label}
+                      onClick={() => switchMode(i === 0)}
+                      className="relative z-10 w-1/2 text-xs font-bold tracking-wide transition-colors duration-200"
+                      style={{ color: (i === 0 ? isLoginMode : !isLoginMode) ? "#060e1a" : "#475569" }}
+                    >
+                      {label}
+                    </button>
+                  ))}
                 </div>
 
-                {loginData.loginWith === "0" ? (
-                  <input type="text" placeholder="Username" required className={inputClass}
-                    value={loginData.username}
-                    onChange={(e) => setLoginData({ ...loginData, username: e.target.value })} />
-                ) : (
-                  <input type="email" placeholder="Email Address" required className={inputClass}
-                    value={loginData.email}
-                    onChange={(e) => setLoginData({ ...loginData, email: e.target.value })} />
-                )}
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={isLoginMode ? "login-h" : "reg-h"}
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 6 }}
+                    transition={{ duration: 0.2 }}
+                    className="mb-6"
+                  >
+                    <h3 className="text-white text-lg font-black tracking-tight">
+                      {isLoginMode ? "Tekrar hoş geldiniz" : "Hesap oluşturun"}
+                    </h3>
+                    <p className="text-[#475569] text-xs mt-1">
+                      {isLoginMode ? "Devam etmek için giriş yapın" : "Mülkleri analiz etmeye bugün başlayın"}
+                    </p>
+                  </motion.div>
+                </AnimatePresence>
 
-                <input type="password" placeholder="Password" required className={inputClass}
-                  value={loginData.password}
-                  onChange={(e) => setLoginData({ ...loginData, password: e.target.value })} />
+                <AnimatePresence>
+                  {message && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="mb-4 px-4 py-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs text-center"
+                    >
+                      {message}
+                    </motion.div>
+                  )}
+                  {error && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="mb-4 px-4 py-2.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs text-center"
+                    >
+                      {error}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
-                <div className="text-right">
-                  <a href="#" className="text-amber-400 text-sm hover:text-amber-300 transition-colors">Forgot password?</a>
-                </div>
+                <AnimatePresence mode="wait">
+                  {isLoginMode ? (
+                    <motion.form
+                      key="login-form"
+                      initial={{ opacity: 0, x: -16 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 16 }}
+                      transition={{ duration: 0.25, ease: "easeOut" }}
+                      onSubmit={handleLogin}
+                      className="space-y-3"
+                    >
+                      <div className="flex gap-5 mb-1">
+                        {[{ val: "0", label: "Kullanıcı Adı" }, { val: "1", label: "E-posta" }].map(({ val, label }) => (
+                          <label key={val} className="flex items-center gap-2 cursor-pointer">
+                            <div
+                              className="w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all duration-150 cursor-pointer"
+                              style={{
+                                borderColor: loginData.loginWith === val ? "#f59e0b" : "#334155",
+                                background: loginData.loginWith === val ? "#f59e0b" : "transparent",
+                              }}
+                              onClick={() => setLoginData({ ...loginData, loginWith: val, email: "", username: "" })}
+                            >
+                              {loginData.loginWith === val && <div className="w-1.5 h-1.5 rounded-full bg-[#060e1a]" />}
+                            </div>
+                            <span className="text-[#64748b] text-xs cursor-pointer"
+                              onClick={() => setLoginData({ ...loginData, loginWith: val, email: "", username: "" })}>
+                              {label}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
 
-                <button type="submit" className="w-full py-3 bg-amber-400 hover:bg-amber-300 text-[#060e1a] font-bold rounded-xl transition-colors text-sm tracking-wide">
-                  Login
-                </button>
+                      <AnimatePresence mode="wait">
+                        {loginData.loginWith === "0" ? (
+                          <motion.div key="uname" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                            <SmartInput
+                              placeholder="Kullanıcı Adı" value={loginData.username}
+                              autoComplete="off"
+                              onChange={(e) => setLoginData({ ...loginData, username: e.target.value })}
+                              onKeyDown={blockSpace} required
+                            />
+                          </motion.div>
+                        ) : (
+                          <motion.div key="email" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                            <SmartInput
+                              type="email" placeholder="E-posta adresi" value={loginData.email}
+                              onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
+                              onKeyDown={blockSpace} required
+                            />
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
 
-                <p className="text-center text-[#4a5a7c] text-sm">
-                  Don't have an account?{" "}
-                  <a href="#" onClick={(e) => { e.preventDefault(); setIsLoginMode(false); }} className="text-amber-400 hover:text-amber-300 transition-colors">
-                    Sign up
-                  </a>
-                </p>
-              </form>
-            )}
+                      <SmartInput
+                        type="password" placeholder="Şifre" value={loginData.password}
+                        autoComplete="off"
+                        onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                        onKeyDown={blockSpace} required
+                      />
 
-            {/* Register Form */}
-            {!isLoginMode && (
-              <form className="space-y-4" onSubmit={handleRegister}>
-                <input type="text" placeholder="Username" required className={inputClass}
-                  value={registerData.username}
-                  onChange={(e) => setRegisterData({ ...registerData, username: e.target.value })} />
+                      <div className="flex justify-end">
+                        <a href="#" className="text-amber-400/70 hover:text-amber-400 text-xs transition-colors">
+                          Şifremi unuttum
+                        </a>
+                      </div>
 
-                <input type="email" placeholder="Email Address" required className={inputClass}
-                  value={registerData.email}
-                  onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })} />
+                      <SubmitButton loading={loading} label="Giriş Yap" />
 
-                <input type="password" placeholder="Password" required className={inputClass}
-                  value={registerData.password}
-                  onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })} />
+                      <p className="text-center text-[#334155] text-xs pt-1">
+                        Hesabınız yok mu?{" "}
+                        <button type="button" onClick={() => switchMode(false)}
+                          className="text-amber-400 hover:text-amber-300 transition-colors font-semibold">
+                          Yeni hesap oluştur
+                        </button>
+                      </p>
+                    </motion.form>
+                  ) : (
+                    <motion.form
+                      key="register-form"
+                      initial={{ opacity: 0, x: 16 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -16 }}
+                      transition={{ duration: 0.25, ease: "easeOut" }}
+                      onSubmit={handleRegister}
+                      className="space-y-3"
+                    >
+                      <SmartInput
+                        placeholder="Kullanıcı Adı" value={registerData.username}
+                        onChange={(e) => setRegisterData({ ...registerData, username: e.target.value })}
+                        onKeyDown={blockSpace} required
+                      />
+                      <SmartInput
+                        type="email" placeholder="E-posta adresi" value={registerData.email}
+                        onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
+                        onKeyDown={blockSpace} required
+                      />
+                      <SmartInput
+                        type="password" placeholder="Şifre" value={registerData.password}
+                        onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
+                        onKeyDown={blockSpace} required
+                      />
+                      <SmartInput
+                        type="password" placeholder="Şifre Onayla" value={registerData.confirmPassword}
+                        onChange={(e) => setRegisterData({ ...registerData, confirmPassword: e.target.value })}
+                        required
+                      />
 
-                <input type="password" placeholder="Confirm Password" required className={inputClass}
-                  value={registerData.confirmPassword}
-                  onChange={(e) => setRegisterData({ ...registerData, confirmPassword: e.target.value })} />
+                      <div className="grid grid-cols-2 gap-2 pt-1">
+                        {[{ val: "USER", label: "Alıcı / Kiracı" }, { val: "OWNER", label: "Mülk Sahibi" }].map(({ val, label }) => (
+                          <button
+                            key={val}
+                            type="button"
+                            onClick={() => setRegisterData({ ...registerData, role: val })}
+                            className="relative py-2.5 px-3 rounded-xl border text-xs font-semibold transition-all duration-200"
+                            style={{
+                              borderColor: registerData.role === val ? "rgba(251,191,36,0.5)" : "rgba(51,65,85,0.6)",
+                              background: registerData.role === val ? "rgba(251,191,36,0.08)" : "rgba(15,23,42,0.5)",
+                              color: registerData.role === val ? "#f59e0b" : "#475569",
+                              boxShadow: registerData.role === val ? "0 0 12px rgba(251,191,36,0.1)" : "none",
+                            }}
+                          >
+                            {label}
+                          </button>
+                        ))}
+                      </div>
 
-                <div className="flex gap-6">
-                  <label className="flex items-center gap-2 cursor-pointer text-[#8a9ab5] text-sm">
-                    <input type="radio" className={radioClass} name="role" checked={registerData.role === "USER"}
-                      onChange={() => setRegisterData({ ...registerData, role: "USER" })} />
-                    User
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer text-[#8a9ab5] text-sm">
-                    <input type="radio" className={radioClass} name="role" checked={registerData.role === "OWNER"}
-                      onChange={() => setRegisterData({ ...registerData, role: "OWNER" })} />
-                    Property Owner
-                  </label>
-                </div>
+                      <SubmitButton loading={loading} label="Hesap Oluştur" />
 
-                <button type="submit" className="w-full py-3 bg-amber-400 hover:bg-amber-300 text-[#060e1a] font-bold rounded-xl transition-colors text-sm tracking-wide">
-                  Create Account
-                </button>
+                      <p className="text-center text-[#334155] text-xs pt-1">
+                        Zaten hesabınız var mı?{" "}
+                        <button type="button" onClick={() => switchMode(true)}
+                          className="text-amber-400 hover:text-amber-300 transition-colors font-semibold">
+                          Giriş yapın
+                        </button>
+                      </p>
+                    </motion.form>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
 
-                <p className="text-center text-[#4a5a7c] text-sm">
-                  Already have an account?{" "}
-                  <a href="#" onClick={(e) => { e.preventDefault(); setIsLoginMode(true); }} className="text-amber-400 hover:text-amber-300 transition-colors">
-                    Login
-                  </a>
-                </p>
-              </form>
-            )}
-          </div>
+            <p className="text-center text-[#1e293b] text-[10px] mt-4 tracking-widest uppercase">
+              Güvenli · Gayrimenkul Zekası Platformu
+            </p>
+          </motion.div>
         </div>
       </div>
     </div>
+  );
+}
+
+// ─── Submit Button ────────────────────────────────────────────────────────────
+function SubmitButton({ loading, label }) {
+  return (
+    <motion.button
+      type="submit"
+      disabled={loading}
+      whileTap={{ scale: 0.98 }}
+      className="relative w-full py-3 rounded-xl font-black text-sm tracking-wide overflow-hidden group disabled:opacity-60 disabled:cursor-not-allowed"
+      style={{
+        background: "linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)",
+        color: "#060e1a",
+        boxShadow: "0 4px 24px rgba(245,158,11,0.25)",
+      }}
+    >
+      <motion.div
+        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        style={{ background: "linear-gradient(135deg, #fbbf24 0%, #fcd34d 100%)" }}
+      />
+      <span className="relative flex items-center justify-center gap-2">
+        {loading ? (
+          <Loader2 className="w-4 h-4 animate-spin" />
+        ) : (
+          <>
+            {label}
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+          </>
+        )}
+      </span>
+    </motion.button>
   );
 }
 

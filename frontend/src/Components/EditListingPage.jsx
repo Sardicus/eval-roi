@@ -69,10 +69,10 @@ function EditListingPage() {
             },
           });
         } else {
-          setError("Failed to load listing.");
+          setError("İlan yüklenemedi.");
         }
       } catch {
-        setError("Could not connect to server.");
+        setError("Sunucuya bağlanılamadı.");
       } finally {
         setLoading(false);
       }
@@ -158,20 +158,20 @@ function EditListingPage() {
       );
 
       if (response.ok) {
-        setMessage("Listing updated successfully!");
-        navigate("/listings");
+        setMessage("İlan başarıyla güncellendi!");
+        setTimeout(() => navigate("/listings"), 1500);
       } else {
         const data = await response.json();
-        setError(data.message || "Failed to update listing.");
+        setError(data.message || "İlan güncellenirken bir hata oluştu.");
       }
     } catch {
-      setError("Could not connect to server.");
+      setError("Sunucuya bağlanılamadı.");
     }
   };
 
   const handleImageUpload = async () => {
     if (selectedFiles.length === 0) {
-      setError("Please select at least one image.");
+      setError("Lütfen en az bir resim seçin.");
       return;
     }
 
@@ -191,13 +191,13 @@ function EditListingPage() {
       );
 
       if (response.ok) {
-        setMessage("Images uploaded successfully!");
+        setMessage("Resimler başarıyla yüklendi!");
         setSelectedFiles([]);
       } else {
-        setError("Failed to upload images.");
+        setError("Resim yükleme başarısız oldu.");
       }
     } catch {
-      setError("Could not connect to server.");
+      setError("Sunucuya bağlanılamadı.");
     }
   };
 
@@ -214,34 +214,43 @@ function EditListingPage() {
     "text-white font-semibold text-lg mb-2";
 
   const detailFields = [
-    { label: "Price *", name: "price", required: true },
-    { label: "Size (m²) *", name: "sizeM2", required: true },
-    { label: "Living Area (m²)", name: "livingAreaM2" },
-    { label: "Bedrooms", name: "bedroomCount" },
-    { label: "Bathrooms", name: "bathroomCount" },
-    { label: "Rooms", name: "roomCount" },
-    { label: "Floor", name: "floorNumber" },
-    { label: "Total Floors", name: "totalFloors" },
-    { label: "Build Year", name: "buildYear" },
+    { label: "Fiyat *", name: "price", required: true },
+    { label: "Brüt Alan (m²) *", name: "sizeM2", required: true },
+    { label: "Net Alan (m²)", name: "livingAreaM2" },
+    { label: "Yatak Odası", name: "bedroomCount" },
+    { label: "Banyo Sayısı", name: "bathroomCount" },
+    { label: "Oda Sayısı", name: "roomCount" },
+    { label: "Bulunduğu Kat", name: "floorNumber" },
+    { label: "Toplam Kat", name: "totalFloors" },
+    { label: "Bina Yaşı/Yapım Yılı", name: "buildYear" },
   ];
 
   const addressFields = [
-    { label: "City", name: "city" },
-    { label: "District", name: "district" },
-    { label: "Neighborhood", name: "neighborhood" },
-    { label: "Street", name: "street" },
-    { label: "Building Number", name: "buildingNumber" },
-    { label: "Floor", name: "floor" },
-    { label: "Apartment Number", name: "apartmentNumber" },
-    { label: "Zip Code", name: "zipCode" },
-    { label: "Latitude", name: "latitude", type: "number" },
-    { label: "Longitude", name: "longitude", type: "number" },
+    { label: "İl", name: "city" },
+    { label: "İlçe", name: "district" },
+    { label: "Mahalle", name: "neighborhood" },
+    { label: "Sokak/Cadde", name: "street" },
+    { label: "Bina No", name: "buildingNumber" },
+    { label: "Kat", name: "floor" },
+    { label: "Daire No", name: "apartmentNumber" },
+    { label: "Posta Kodu", name: "zipCode" },
+    { label: "Enlem (Latitude)", name: "latitude", type: "number" },
+    { label: "Boylam (Longitude)", name: "longitude", type: "number" },
   ];
+
+  // Özellik isimlerini Türkçeleştirmek için bir sözlük
+  const featureLabels = {
+    hasParking: "Otopark",
+    hasElevator: "Asansör",
+    hasBalcony: "Balkon",
+    hasGarden: "Bahçeli",
+    isFurnished: "Eşyalı"
+  };
 
   if (loading)
     return (
       <div className="min-h-screen bg-[#0f172a] text-white p-8">
-        Loading...
+        Yükleniyor...
       </div>
     );
 
@@ -253,11 +262,11 @@ function EditListingPage() {
           onClick={() => navigate("/listings")}
           className="mb-6 text-[#94a3b8] hover:text-amber-400 text-sm"
         >
-          ← Back to Listings
+          ← İlanlara Dön
         </button>
 
         <h1 className="text-2xl font-bold text-white mb-6">
-          Edit Listing
+          İlanı Düzenle
         </h1>
 
         {error && (
@@ -274,29 +283,31 @@ function EditListingPage() {
 
         <form onSubmit={handleUpdate} className="space-y-6">
 
-          {/* Basic Info */}
+          {/* Temel Bilgiler */}
           <div className={sectionClass}>
-            <h2 className={sectionTitle}>Basic Info</h2>
+            <h2 className={sectionTitle}>Temel Bilgiler</h2>
 
             <div>
-              <label className={labelClass}>Title *</label>
+              <label className={labelClass}>Başlık *</label>
               <input name="title" required className={inputClass}
                 value={formData.title}
-                onChange={handleChange}/>
+                onChange={handleChange}
+                placeholder="Örn: Beşiktaş'ta Deniz Manzaralı 3+1"/>
             </div>
 
             <div>
-              <label className={labelClass}>Description</label>
+              <label className={labelClass}>Açıklama</label>
               <textarea name="description" rows={3}
                 className={inputClass}
                 value={formData.description}
-                onChange={handleChange}/>
+                onChange={handleChange}
+                placeholder="İlan detaylarını buraya yazın..."/>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
 
               <div>
-                <label className={labelClass}>Property Type *</label>
+                <label className={labelClass}>Gayrimenkul Tipi *</label>
                 <select name="propertyType" className={inputClass}
                   value={formData.propertyType}
                   onChange={handleChange}>
@@ -307,12 +318,12 @@ function EditListingPage() {
               </div>
 
               <div>
-                <label className={labelClass}>Status</label>
+                <label className={labelClass}>Durum</label>
                 <select name="status" className={inputClass}
                   value={formData.status}
                   onChange={handleChange}>
                   {Object.entries(listingStatuses).map(([k,v])=>(
-                    <option key={k} value={k}>{v}</option>
+                    <option key={k} value={k}>{v === "Active" ? "Aktif" : v === "Sold" ? "Satıldı" : "Pasif"}</option>
                   ))}
                 </select>
               </div>
@@ -320,9 +331,9 @@ function EditListingPage() {
             </div>
           </div>
 
-          {/* Details */}
+          {/* Teknik Detaylar */}
           <div className={sectionClass}>
-            <h2 className={sectionTitle}>Details</h2>
+            <h2 className={sectionTitle}>Teknik Detaylar</h2>
 
             <div className="grid grid-cols-2 gap-4">
               {detailFields.map((field)=>(
@@ -340,7 +351,7 @@ function EditListingPage() {
               ))}
 
               <div>
-                <label className={labelClass}>Heating Type</label>
+                <label className={labelClass}>Isınma Tipi</label>
                 <select name="heatingType" className={inputClass}
                   value={formData.heatingType}
                   onChange={handleChange}>
@@ -352,28 +363,29 @@ function EditListingPage() {
             </div>
           </div>
 
-          {/* Features */}
+          {/* Özellikler */}
           <div className={sectionClass}>
-            <h2 className={sectionTitle}>Features</h2>
+            <h2 className={sectionTitle}>Ek Özellikler</h2>
 
             <div className="grid grid-cols-3 gap-4">
-              {["hasParking","hasElevator","hasBalcony","hasGarden","isFurnished"].map((feature)=>(
+              {Object.keys(featureLabels).map((feature)=>(
                 <label key={feature} className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox"
                     name={feature}
                     checked={formData[feature]}
-                    onChange={handleChange}/>
+                    onChange={handleChange}
+                    className="accent-amber-400"/>
                   <span className="text-[#94a3b8] text-sm">
-                    {feature.replace(/([A-Z])/g," $1").replace("has ","Has ").replace("is ","Is ")}
+                    {featureLabels[feature]}
                   </span>
                 </label>
               ))}
             </div>
           </div>
 
-          {/* Address */}
+          {/* Adres Bilgileri */}
           <div className={sectionClass}>
-            <h2 className={sectionTitle}>Address</h2>
+            <h2 className={sectionTitle}>Adres Bilgileri</h2>
 
             <div className="grid grid-cols-2 gap-4">
               {addressFields.map((field)=>(
@@ -393,36 +405,36 @@ function EditListingPage() {
 
           <button
             type="submit"
-            className="w-full py-3 bg-amber-400 hover:bg-amber-300 text-[#0f172a] font-bold rounded-xl transition"
+            className="w-full py-3 bg-amber-400 hover:bg-amber-300 text-[#0f172a] font-bold rounded-xl transition shadow-lg shadow-amber-400/20"
           >
-            Save Changes
+            Değişiklikleri Kaydet
           </button>
 
         </form>
 
-        {/* Image Upload */}
+        {/* Resim Yükleme Bölümü */}
         <div className={sectionClass + " mt-6"}>
-          <h2 className={sectionTitle}>Upload Images</h2>
+          <h2 className={sectionTitle}>Resim Yükle</h2>
 
           <input
             type="file"
             multiple
             accept="image/*"
             onChange={(e)=>setSelectedFiles(Array.from(e.target.files))}
-            className="mb-4 text-white"
+            className="mb-4 text-white text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-amber-400 file:text-[#0f172a] hover:file:bg-amber-300 cursor-pointer"
           />
 
           {selectedFiles.length>0 && (
             <p className="text-[#94a3b8] text-sm mb-4">
-              {selectedFiles.length} file(s) selected
+              {selectedFiles.length} dosya seçildi
             </p>
           )}
 
           <button
             onClick={handleImageUpload}
-            className="px-6 py-2 bg-amber-400 hover:bg-amber-300 text-[#0f172a] font-bold rounded-xl"
+            className="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl transition border border-slate-500"
           >
-            Upload Images
+            Seçili Resimleri Yükle
           </button>
         </div>
 
