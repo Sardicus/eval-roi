@@ -8,13 +8,11 @@ export default function PriceFilter({
     min = 0,
     max = 50000000,
 }) {
-    // Yerel state'ler (Apply butonuna basana kadar dışarıyı etkilemez)
     const [localMin, setLocalMin] = useState(minPrice ?? min);
     const [localMax, setLocalMax] = useState(maxPrice ?? max);
     const trackRef = useRef(null);
     const dragging = useRef(null);
 
-    // Dışarıdan gelen prop değişikliklerini takip et
     useEffect(() => {
         setLocalMin(minPrice ?? min);
         setLocalMax(maxPrice ?? max);
@@ -28,21 +26,24 @@ export default function PriceFilter({
         const rect = track.getBoundingClientRect();
         const percent = Math.min(Math.max((clientX - rect.left) / rect.width, 0), 1);
         const raw = min + percent * (max - min);
-        // 100.000'er basamaklarla yuvarla
-        return Math.round(raw / 100000) * 100000;
+        const rounded = Math.round(raw / 100000) * 100000;
+        return Math.max(min, Math.min(rounded, max));
     }, [min, max]);
 
-    // Mouse ve Touch olaylarını yöneten Effect
     useEffect(() => {
         const onMouseMove = (e) => {
             if (!dragging.current) return;
             const val = getValueFromClientX(e.clientX);
+            
             if (dragging.current === "min") {
-                // Minimum değer maksimumun 100k altını geçemez
-                setLocalMin(Math.min(val, localMax - 100000));
+                setLocalMin(prevMin => {
+                    // Use functional update to get current localMax reliably
+                    return Math.max(min, Math.min(val, localMax - 100000));
+                });
             } else {
-                // Maksimum değer minimumun 100k üstünü geçemez
-                setLocalMax(Math.max(val, localMin + 100000));
+                setLocalMax(prevMax => {
+                    return Math.min(max, Math.max(val, localMin + 100000));
+                });
             }
         };
 
@@ -52,9 +53,9 @@ export default function PriceFilter({
             if (!dragging.current) return;
             const val = getValueFromClientX(e.touches[0].clientX);
             if (dragging.current === "min") {
-                setLocalMin(Math.min(val, localMax - 100000));
+                setLocalMin(prev => Math.max(min, Math.min(val, localMax - 100000)));
             } else {
-                setLocalMax(Math.max(val, localMin + 100000));
+                setLocalMax(prev => Math.min(max, Math.max(val, localMin + 100000)));
             }
         };
 
@@ -69,23 +70,26 @@ export default function PriceFilter({
             window.removeEventListener("touchmove", onTouchMove);
             window.removeEventListener("touchend", onMouseUp);
         };
-    }, [localMin, localMax, getValueFromClientX]);
+    }, [getValueFromClientX, localMax, localMin, min, max]); 
 
     const handleTrackClick = useCallback((e) => {
         if (dragging.current) return;
         const val = getValueFromClientX(e.clientX);
+
         const distToMin = Math.abs(val - localMin);
         const distToMax = Math.abs(val - localMax);
-        if (distToMin <= distToMax) {
-            setLocalMin(Math.min(val, localMax - 100000));
-        } else {
-            setLocalMax(Math.max(val, localMin + 100000));
-        }
-    }, [localMin, localMax, getValueFromClientX]);
 
-    // Input değişimi için yardımcı fonksiyon (Sadece rakamları alır)
+        if (distToMin <= distToMax) {
+            const safeMin = Math.max(min, Math.min(val, localMax - 100000));
+            setLocalMin(safeMin);
+        } else {
+            const safeMax = Math.min(max, Math.max(val, localMin + 100000));
+            setLocalMax(safeMax);
+        }
+    }, [localMin, localMax, getValueFromClientX, min, max]);
+
     const handleInputChange = (value, type) => {
-        const numericValue = Number(value.replace(/\D/g, ""));
+        const numericValue = Math.max(0, Number(value.replace(/\D/g, "")));
         if (type === "min") {
             setLocalMin(numericValue);
         } else {
@@ -100,10 +104,7 @@ export default function PriceFilter({
         <div className="p-4 bg-[#0f172a] border border-[#334155] rounded-xl flex flex-col gap-4">
             <label className="text-xs font-semibold uppercase tracking-widest text-[#64748b]">Fiyat Aralığı</label>
 
-            {/* Kaydırıcı (Slider) Alanı */}
             <div className="relative" style={{ height: "32px", margin: "0 11px" }}>
-
-                {/* Tıklanabilir İz */}
                 <div
                     ref={trackRef}
                     onClick={handleTrackClick}
@@ -119,7 +120,6 @@ export default function PriceFilter({
                     }}
                 />
 
-                {/* Seçili Alan (Amber Rengi) */}
                 <div
                     className="absolute pointer-events-none rounded-full"
                     style={{
@@ -132,7 +132,6 @@ export default function PriceFilter({
                     }}
                 />
 
-                {/* Min Thumb (Sol Buton) */}
                 <div
                     onMouseDown={(e) => { e.preventDefault(); dragging.current = "min"; }}
                     onTouchStart={() => { dragging.current = "min"; }}
@@ -146,11 +145,10 @@ export default function PriceFilter({
                         background: "white",
                         border: "3px solid #f59e0b",
                         boxShadow: "0 0 0 3px rgba(245,158,11,0.2), 0 2px 6px rgba(0,0,0,0.5)",
-                        zIndex: 5,
+                        zIndex: 10,
                     }}
                 />
 
-                {/* Max Thumb (Sağ Buton) */}
                 <div
                     onMouseDown={(e) => { e.preventDefault(); dragging.current = "max"; }}
                     onTouchStart={() => { dragging.current = "max"; }}
@@ -164,27 +162,24 @@ export default function PriceFilter({
                         background: "white",
                         border: "3px solid #f59e0b",
                         boxShadow: "0 0 0 3px rgba(245,158,11,0.2), 0 2px 6px rgba(0,0,0,0.5)",
-                        zIndex: 5,
+                        zIndex: 10,
                     }}
                 />
             </div>
 
-            {/* Alt Bilgi Etiketleri */}
             <div className="flex justify-between text-xs text-[#64748b] -mt-2">
                 <span>₺{min.toLocaleString('tr-TR')}</span>
                 <span>₺{max.toLocaleString('tr-TR')}</span>
             </div>
 
-            {/* Inputlar ve Uygula Butonu */}
             <div className="flex gap-2 items-center">
                 <div className="flex-1 bg-[#1e293b] border border-[#334155] rounded-lg px-3 py-2">
                     <p className="text-xs text-[#64748b] mb-0.5">Min</p>
                     <input
                         type="text"
-                        value={localMin === 0 && min === 0 ? "" : localMin.toLocaleString("tr-TR")}
+                        value={localMin.toLocaleString("tr-TR")}
                         onChange={(e) => handleInputChange(e.target.value, "min")}
-                        placeholder="Min"
-                        className="w-full bg-transparent text-white text-sm font-semibold outline-none placeholder-[#64748b]"
+                        className="w-full bg-transparent text-white text-sm font-semibold outline-none"
                     />
                 </div>
                 <span className="text-[#334155] text-lg">—</span>
@@ -192,19 +187,15 @@ export default function PriceFilter({
                     <p className="text-xs text-[#64748b] mb-0.5">Maks</p>
                     <input
                         type="text"
-                        value={localMax === max ? "" : localMax.toLocaleString("tr-TR")}
+                        value={localMax.toLocaleString("tr-TR")}
                         onChange={(e) => handleInputChange(e.target.value, "max")}
-                        placeholder="Maks"
-                        className="w-full bg-transparent text-white text-sm font-semibold outline-none placeholder-[#64748b]"
+                        className="w-full bg-transparent text-white text-sm font-semibold outline-none"
                     />
                 </div>
                 <button
-                    onClick={() => { 
-                        // Uygularken son bir mantık kontrolü
-                        const finalMin = Math.min(localMin, localMax);
-                        const finalMax = Math.max(localMin, localMax);
-                        setMinPrice(finalMin); 
-                        setMaxPrice(finalMax); 
+                    onClick={() => {
+                        setMinPrice(localMin);
+                        setMaxPrice(localMax);
                     }}
                     className="px-4 py-3 bg-amber-400 hover:bg-amber-300 text-[#0f172a] font-bold rounded-lg text-sm transition-colors"
                 >
