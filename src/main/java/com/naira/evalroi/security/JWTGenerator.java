@@ -5,6 +5,7 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -21,8 +22,14 @@ public class JWTGenerator {
         String identifier = authentication.getName();
         Date expirationDate = new Date(System.currentTimeMillis() + SecurityConstants.JWT_EXPIRATION_TIME);
 
+        String userType = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .findFirst()
+                .orElse("user");
+
         return Jwts.builder()
                 .subject(identifier)
+                .claim("userType", userType)
                 .issuedAt(new Date())
                 .expiration(expirationDate)
                 .signWith(getSigningKey())

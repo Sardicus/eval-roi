@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useEnums } from "../hooks/useEnums.js";
-import { securedFetch } from "../utils/api"; // Merkezi fetch aracını ekledik
+import { securedFetch } from "../utils/api";
+import { usePageTitle } from '../hooks/usePageTitle.js';
 
 function AddListingPage() {
+  usePageTitle("İlan Ekle");
   const navigate = useNavigate();
   const [error, setError] = useState("");
   const { propertyTypes, heatingTypes, listingStatuses } = useEnums();

@@ -2,16 +2,25 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useEnums } from "../hooks/useEnums.js";
 import AIAnalysisCard from "./AIAnalysisCard";
-import { securedFetch } from "../utils/api"; // Merkezi fetch aracını ekledik
+import { securedFetch } from "../utils/api";
+import { useAuth } from '../hooks/useAuth.js';
+import { usePageTitle } from '../hooks/usePageTitle.js';
 
 function ListingDetailPage() {
+  usePageTitle("İlan Detayları");
   const { id } = useParams();
   const navigate = useNavigate();
-  const [listing, setListing]   = useState(null);
-  const [error, setError]       = useState("");
-  const [loading, setLoading]   = useState(true);
+  const [listing, setListing] = useState(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
   const [profiles, setProfiles] = useState([]);
   const { propertyTypes, heatingTypes, listingStatuses } = useEnums();
+  const { user, logout, isLoggedIn } = useAuth();
+
+  const canEdit = isLoggedIn && (
+    user.userType === "ADMIN" ||
+    (user.userType === "OWNER" && user.sub === listing.ownerIdentifier)
+  );
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -46,10 +55,10 @@ function ListingDetailPage() {
   }, [id]);
 
   if (loading) return <div className="min-h-screen bg-[#0f172a] p-8 text-[#94a3b8]">Yükleniyor...</div>;
-  if (error)   return <div className="min-h-screen bg-[#0f172a] p-8 text-red-400">{error}</div>;
+  if (error) return <div className="min-h-screen bg-[#0f172a] p-8 text-red-400">{error}</div>;
   if (!listing) return null;
 
-  const cardClass  = "bg-[#1e293b] border border-[#334155] rounded-2xl p-6";
+  const cardClass = "bg-[#1e293b] border border-[#334155] rounded-2xl p-6";
   const labelClass = "text-[#64748b]";
   const valueClass = "text-white font-medium";
 
@@ -69,16 +78,15 @@ function ListingDetailPage() {
         <div className="relative h-80 bg-[#0f172a] rounded-2xl mb-6 overflow-hidden flex items-center justify-center border border-[#334155]">
           {listing.primaryImageUrl
             ? <>
-                <img src={`http://localhost:8080${listing.primaryImageUrl}`} alt={listing.title} className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-transparent to-transparent opacity-60" />
-              </>
+              <img src={`http://localhost:8080${listing.primaryImageUrl}`} alt={listing.title} className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-transparent to-transparent opacity-60" />
+            </>
             : <span className="text-[#334155]">Görsel Yok</span>
           }
-          <span className={`absolute top-4 right-4 text-xs font-bold px-3 py-1 rounded-full border backdrop-blur-sm ${
-            listing.status === "ACTIVE" ? "bg-emerald-900/80 text-emerald-400 border-emerald-400/20" :
-            listing.status === "SOLD"   ? "bg-gray-900/80 text-gray-400 border-gray-400/20" :
-                                          "bg-amber-900/80 text-amber-400 border-amber-400/20"
-          }`}>
+          <span className={`absolute top-4 right-4 text-xs font-bold px-3 py-1 rounded-full border backdrop-blur-sm ${listing.status === "ACTIVE" ? "bg-emerald-900/80 text-emerald-400 border-emerald-400/20" :
+            listing.status === "SOLD" ? "bg-gray-900/80 text-gray-400 border-gray-400/20" :
+              "bg-amber-900/80 text-amber-400 border-amber-400/20"
+            }`}>
             {listingStatuses[listing.status] || listing.status}
           </span>
         </div>
@@ -97,10 +105,10 @@ function ListingDetailPage() {
         {/* Önemli Bilgi Çubuğu */}
         <div className="grid grid-cols-5 gap-4 bg-[#1e293b] border border-[#334155] rounded-2xl p-4 mb-6 text-center">
           {[
-            { value: listing.sizeM2,                                         label: "m²" },
-            { value: listing.bedroomCount  ?? "-",                         label: "Yatak Odası" },
-            { value: listing.bathroomCount ?? "-",                         label: "Banyo" },
-            { value: listing.roomCount     ?? "-",                         label: "Oda Sayısı" },
+            { value: listing.sizeM2, label: "m²" },
+            { value: listing.bedroomCount ?? "-", label: "Yatak Odası" },
+            { value: listing.bathroomCount ?? "-", label: "Banyo" },
+            { value: listing.roomCount ?? "-", label: "Oda Sayısı" },
             { value: `${listing.floorNumber ?? "-"}/${listing.totalFloors ?? "-"}`, label: "Kat" },
           ].map(({ value, label }) => (
             <div key={label} className="border-r border-[#334155] last:border-0">
@@ -117,11 +125,11 @@ function ListingDetailPage() {
             <h2 className="text-white font-semibold text-lg mb-4">Emlak Bilgileri</h2>
             <div className="space-y-3">
               {[
-                { label: "Tip",         value: propertyTypes[listing.propertyType] || listing.propertyType },
-                { label: "Bina Yaşı",   value: listing.buildYear    ?? "-" },
-                { label: "Net Alan",    value: listing.livingAreaM2 ? `${listing.livingAreaM2} m²` : "-" },
-                { label: "Isınma",      value: heatingTypes[listing.heatingType] || listing.heatingType },
-                { label: "Toplam Kat",  value: listing.totalFloors  ?? "-" },
+                { label: "Tip", value: propertyTypes[listing.propertyType] || listing.propertyType },
+                { label: "Bina Yaşı", value: listing.buildYear ?? "-" },
+                { label: "Net Alan", value: listing.livingAreaM2 ? `${listing.livingAreaM2} m²` : "-" },
+                { label: "Isınma", value: heatingTypes[listing.heatingType] || listing.heatingType },
+                { label: "Toplam Kat", value: listing.totalFloors ?? "-" },
               ].map(({ label, value }) => (
                 <div key={label} className="flex justify-between border-b border-[#334155] pb-2 last:border-0 last:pb-0">
                   <span className={labelClass}>{label}</span>
@@ -136,11 +144,11 @@ function ListingDetailPage() {
             <h2 className="text-white font-semibold text-lg mb-4">Özellikler</h2>
             <div className="space-y-3">
               {[
-                { label: "Otopark",   value: listing.hasParking },
-                { label: "Asansör",   value: listing.hasElevator },
-                { label: "Balkon",    value: listing.hasBalcony },
-                { label: "Bahçe",     value: listing.hasGarden },
-                { label: "Eşyalı",    value: listing.isFurnished },
+                { label: "Otopark", value: listing.hasParking },
+                { label: "Asansör", value: listing.hasElevator },
+                { label: "Balkon", value: listing.hasBalcony },
+                { label: "Bahçe", value: listing.hasGarden },
+                { label: "Eşyalı", value: listing.isFurnished },
               ].map(({ label, value }) => (
                 <div key={label} className="flex justify-between border-b border-[#334155] pb-2 last:border-0 last:pb-0">
                   <span className={labelClass}>{label}</span>
@@ -157,11 +165,11 @@ function ListingDetailPage() {
             <h2 className="text-white font-semibold text-lg mb-4">Adres</h2>
             <div className="space-y-3">
               {[
-                { label: "Sokak/Cadde",  value: listing.address.street },
-                { label: "Mahalle",      value: listing.address.neighborhood },
-                { label: "İlçe",         value: listing.address.district },
-                { label: "Şehir",        value: listing.address.city },
-                { label: "Posta Kodu",   value: listing.address.zipCode },
+                { label: "Sokak/Cadde", value: listing.address.street },
+                { label: "Mahalle", value: listing.address.neighborhood },
+                { label: "İlçe", value: listing.address.district },
+                { label: "Şehir", value: listing.address.city },
+                { label: "Posta Kodu", value: listing.address.zipCode },
               ].map(({ label, value }) => (
                 <div key={label} className="flex justify-between border-b border-[#334155] pb-2 last:border-0 last:pb-0">
                   <span className={labelClass}>{label}</span>
@@ -190,12 +198,14 @@ function ListingDetailPage() {
 
         {/* İşlemler */}
         <div className="mt-6 flex gap-4">
-          <button
-            onClick={() => navigate(`/edit-listing/${listing.id}`)}
-            className="px-6 py-2.5 bg-amber-400 hover:bg-amber-300 text-[#0f172a] font-bold rounded-xl transition-colors text-sm"
-          >
-            İlanı Düzenle
-          </button>
+          {canEdit && (
+            <button
+              onClick={() => navigate(`/edit-listing/${listing.id}`)}
+              className="px-6 py-2.5 bg-amber-400 hover:bg-amber-300 text-[#0f172a] font-bold rounded-xl transition-colors text-sm"
+            >
+              İlanı Düzenle
+            </button>
+          )}
         </div>
 
       </div>

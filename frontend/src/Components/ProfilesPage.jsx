@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { userBuyerProfileEnums } from "../hooks/userBuyerProfileEnums.js";
-import { securedFetch } from "../utils/api"; // Merkezi fetch kullanımı önerilir
+import { securedFetch } from "../utils/api";
+import { usePageTitle } from '../hooks/usePageTitle.js';
 
 const emptyForm = {
     profileName: "",
@@ -22,6 +23,7 @@ const emptyForm = {
 };
 
 function ProfilesPage() {
+    usePageTitle("Profiller");
     const [profiles, setProfiles] = useState([]);
     const [error, setError] = useState("");
     const [showForm, setShowForm] = useState(false);
@@ -124,11 +126,10 @@ function ProfilesPage() {
                         key={String(opt.value)}
                         type="button"
                         onClick={() => setFormData({ ...formData, [field]: opt.value })}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
-                            formData[field] === opt.value
-                            ? "bg-amber-400 border-amber-400 text-[#0f172a]"
-                            : "bg-[#0f172a] border-[#334155] text-[#94a3b8] hover:text-white"
-                        }`}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${formData[field] === opt.value
+                                ? "bg-amber-400 border-amber-400 text-[#0f172a]"
+                                : "bg-[#0f172a] border-[#334155] text-[#94a3b8] hover:text-white"
+                            }`}
                     >
                         {opt.label}
                     </button>
@@ -224,11 +225,10 @@ function ProfilesPage() {
                                     {booleanFields
                                         .filter(f => profile[f.field] !== null && profile[f.field] !== undefined)
                                         .map(({ label, field }) => (
-                                            <span key={field} className={`text-xs px-2 py-1 rounded-full border ${
-                                                profile[field]
-                                                ? "bg-emerald-400/10 text-emerald-400 border-emerald-400/20"
-                                                : "bg-red-400/10 text-red-400 border-red-400/20"
-                                            }`}>
+                                            <span key={field} className={`text-xs px-2 py-1 rounded-full border ${profile[field]
+                                                    ? "bg-emerald-400/10 text-emerald-400 border-emerald-400/20"
+                                                    : "bg-red-400/10 text-red-400 border-red-400/20"
+                                                }`}>
                                                 {profile[field] ? "✓" : "✗"} {label}
                                             </span>
                                         ))

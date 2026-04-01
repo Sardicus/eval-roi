@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useEnums } from "../hooks/useEnums.js";
+import { usePageTitle } from '../hooks/usePageTitle.js';
 
 function EditListingPage() {
+  usePageTitle("İlan Düzenle");
   const { id } = useParams();
   const navigate = useNavigate();
   const [error, setError] = useState("");

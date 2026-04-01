@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import FraudAnalysisCard from "../Components/FraudAnalysisCard";
+import { usePageTitle } from '../hooks/usePageTitle.js';
 
 export default function FraudCheckPage() {
+  usePageTitle("Sahtelik Analizi");
   const token   = localStorage.getItem("token");
   const headers = { "Authorization": `Bearer ${token}` };
 

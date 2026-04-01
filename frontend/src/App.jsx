@@ -14,41 +14,34 @@ const App = () => {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/login" replace />} />
-      <Route path="/login" element={
-        <Login />
-      } />
+      <Route path="/login" element={<Login />} />
+
       <Route path="/listings" element={
-        <ProtectedRoute>
-          <><Navbar /><ListingsPage /></>
-        </ProtectedRoute>
+        <ProtectedRoute><Navbar /><ListingsPage /></ProtectedRoute>
       } />
+
       <Route path="/add-listing" element={
-        <ProtectedRoute>
-          <><Navbar /><AddListingPage /></>
+        <ProtectedRoute allowedRoles={["OWNER", "ADMIN"]}>
+          <Navbar /><AddListingPage />
         </ProtectedRoute>
       } />
+
       <Route path="/edit-listing/:id" element={
-        <ProtectedRoute>
-          <><Navbar /><EditListingPage /></>
+        <ProtectedRoute allowedRoles={["OWNER", "ADMIN"]}>
+          <Navbar /><EditListingPage />
         </ProtectedRoute>
       } />
-      <Route path="/listing/:id" element={
-        <ProtectedRoute>
-          <><Navbar /><ListingDetailPage /></>
-        </ProtectedRoute>
-      } />
-      <Route path="/profiles" element={
-        <ProtectedRoute>
-          <><Navbar /><ProfilesPage /></>
-        </ProtectedRoute>
-      } />
+
       <Route path="/fraud-check" element={
-        <ProtectedRoute>
-          <><Navbar /><FraudCheckPage /></>
-        </ProtectedRoute>
+        <ProtectedRoute>  
+          <Navbar /><FraudCheckPage />
+           </ProtectedRoute>
       } />
+
+      <Route path="/listing/:id" element={<ProtectedRoute><Navbar /><ListingDetailPage /></ProtectedRoute>} />
+      <Route path="/profiles" element={<ProtectedRoute><Navbar /><ProfilesPage /></ProtectedRoute>} />
     </Routes>
-  )
+  );
 }
 
 export default App

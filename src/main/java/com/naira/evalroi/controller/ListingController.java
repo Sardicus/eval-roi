@@ -4,6 +4,7 @@ import com.naira.evalroi.dto.listing.CreateListingRequest;
 import com.naira.evalroi.dto.listing.ListingResponseDto;
 import com.naira.evalroi.enums.ListingStatus;
 import com.naira.evalroi.enums.PropertyType;
+import com.naira.evalroi.security.IsOwnerOrAdmin;
 import com.naira.evalroi.service.ListingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +30,7 @@ public class ListingController {
     private final ListingService listingService;
 
     @PostMapping("create")
+    @IsOwnerOrAdmin
     public ResponseEntity<ListingResponseDto> createListing(
             @RequestBody @Valid CreateListingRequest request,
             @AuthenticationPrincipal UserDetails userDetails
@@ -36,6 +39,7 @@ public class ListingController {
     }
 
     @PutMapping("/updateListing/{id}")
+    @IsOwnerOrAdmin
     public ResponseEntity<ListingResponseDto> updateListing(
             @PathVariable Integer id,
             @RequestBody @Valid CreateListingRequest request,
@@ -63,6 +67,7 @@ public class ListingController {
     }
 
     @DeleteMapping("delete/{id}")
+    @IsOwnerOrAdmin
     public ResponseEntity<String> deleteListing(
             @PathVariable Integer id ,
             @AuthenticationPrincipal UserDetails userDetails
@@ -87,6 +92,7 @@ public class ListingController {
     }
 
     @DeleteMapping("delete/{listingId}/{imgId}")
+    @IsOwnerOrAdmin
     public ResponseEntity<String> deleteImageFromListing(
             @PathVariable Integer listingId ,
             @PathVariable Integer imgId ,
@@ -97,6 +103,7 @@ public class ListingController {
     }
 
     @PostMapping("primaryImage/{listingId}/{imgId}")
+    @IsOwnerOrAdmin
     public ResponseEntity<String> setPrimaryImageToListing(
             @PathVariable Integer listingId ,
             @PathVariable Integer imgId ,
@@ -107,6 +114,7 @@ public class ListingController {
     }
 
     @PutMapping("updateListingStatus/{listingId}")
+    @IsOwnerOrAdmin
     public ResponseEntity<String> updateListingStatus(
             @PathVariable Integer listingId,
             @RequestParam String status,

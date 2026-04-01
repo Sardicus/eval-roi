@@ -1,13 +1,14 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from '../hooks/useAuth.js';
 
 function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout, isLoggedIn } = useAuth();
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/");
+  const canAccess = (allowedRoles) => {
+    return isLoggedIn && allowedRoles.includes(user?.userType);
   };
 
   const navLink = (path, label) => (
@@ -36,17 +37,34 @@ function Navbar() {
 
       <div className="flex items-center gap-8">
         {navLink("/listings", "İlanlar")}
-        {navLink("/add-listing", "İlan Ekle")}
-        {navLink("/profiles", "Profiller")}
+
+        {canAccess(["OWNER", "ADMIN"]) && navLink("/add-listing", "İlan Ekle")}
+
         {navLink("/fraud-check", "Analiz & Denetim")}
+
+        {navLink("/profiles", "Profiller")}
       </div>
 
-      <button
-        onClick={handleLogout}
-        className="px-4 py-2 bg-[#1a2540] border border-[#2a3a5c] text-[#8a9ab5] hover:text-white hover:border-amber-400/40 rounded-xl text-sm font-medium transition-all"
-      >
-        Çıkış Yap
-      </button>
+      <div className="flex items-center gap-4">
+        {isLoggedIn ? (
+          <button
+            onClick={() => {
+              logout();
+              navigate("/login");
+            }}
+            className="px-4 py-2 bg-[#1a2540] border border-[#2a3a5c] text-[#8a9ab5] hover:text-white hover:border-amber-400/40 rounded-xl text-sm font-medium transition-all"
+          >
+            Çıkış Yap
+          </button>
+        ) : (
+          <button
+            onClick={() => navigate("/")}
+            className="px-4 py-2 bg-amber-400 text-[#060e1a] rounded-xl text-sm font-bold hover:bg-amber-300 transition-all"
+          >
+            Giriş Yap
+          </button>
+        )}
+      </div>
     </nav>
   );
 }

@@ -3,11 +3,21 @@ import { useNavigate } from "react-router-dom";
 import { useEnums } from "../hooks/useEnums";
 import { securedFetch } from "../utils/api";
 import ListingFilter from "./ListingFilter";
+import { useAuth } from '../hooks/useAuth.js';
+import { usePageTitle } from '../hooks/usePageTitle.js';
 
 function ListingsPage() {
+  usePageTitle("İlanlar");
   const [listingsPage, setListingsPage] = useState({ content: [] });
   const [error, setError] = useState("");
   const { propertyTypes } = useEnums();
+  const { user, logout, isLoggedIn } = useAuth();
+  const canEdit = isLoggedIn && (
+    user.userType === "ADMIN" ||
+    (user.userType === "OWNER" && user.sub === listing.ownerIdentifier)
+  );
+
+
   const [filters, setFilters] = useState({
     title: "",
     city: "",
@@ -178,7 +188,7 @@ function ListingsPage() {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
             </svg>
-            
+
             Filtreler
 
             {/* Aktif Filtre Sayısı Rozeti */}
@@ -188,12 +198,13 @@ function ListingsPage() {
               </span>
             )}
           </button>
-          <button
-            onClick={() => navigate("/add-listing")}
-            className="px-5 py-2.5 bg-amber-400 hover:bg-amber-300 text-[#0f172a] font-bold rounded-xl transition-colors text-sm shadow-lg shadow-amber-400/10"
-          >
-            + İlan Ekle
-          </button>
+          {canEdit && (
+            <button
+              onClick={() => navigate("/add-listing")}
+              className="px-5 py-2.5 bg-amber-400 hover:bg-amber-300 text-[#0f172a] font-bold rounded-xl transition-colors text-sm shadow-lg shadow-amber-400/10"
+            >
+              + İlan Ekle
+            </button>)}
         </div>
       </div>
 
@@ -204,8 +215,7 @@ function ListingsPage() {
           setFilters={setFilters}
           onApply={() => {
             fetchListings(0);
-            // İsterseniz uygulandığında paneli kapatabilirsiniz:
-            // setShowFilter(false); 
+            setShowFilter(false);
           }}
         />
       )}
@@ -306,40 +316,42 @@ function ListingsPage() {
               )}
 
               {/* İşlemler */}
-              <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-[#334155]">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/edit-listing/${listing.id}`);
-                  }}
-                  className="px-3 py-1.5 bg-[#0f172a] border border-[#334155] text-[#94a3b8] hover:text-white hover:border-amber-400/40 rounded-lg text-xs font-medium transition-all"
-                >
-                  Düzenle
-                </button>
-                <button
-                  onClick={(e) => handleStatusChange(e, listing.id, listing.status === "ACTIVE" ? "INACTIVE" : "ACTIVE")}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${listing.status === "ACTIVE"
-                    ? "bg-amber-400/10 border-amber-400/20 text-amber-400 hover:bg-amber-400/20"
-                    : "bg-emerald-400/10 border-emerald-400/20 text-emerald-400 hover:bg-emerald-400/20"
-                    }`}
-                >
-                  {listing.status === "ACTIVE" ? "Pasife Al" : "Yayına Al"}
-                </button>
-                {listing.status !== "SOLD" && (
+              {canEdit && (
+                <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-[#334155]">
                   <button
-                    onClick={(e) => handleStatusChange(e, listing.id, "SOLD")}
-                    className="px-3 py-1.5 bg-[#0f172a] border border-[#334155] text-[#94a3b8] hover:text-white rounded-lg text-xs font-medium transition-all"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/edit-listing/${listing.id}`);
+                    }}
+                    className="px-3 py-1.5 bg-[#0f172a] border border-[#334155] text-[#94a3b8] hover:text-white hover:border-amber-400/40 rounded-lg text-xs font-medium transition-all"
                   >
-                    Satıldı İşaretle
+                    Düzenle
                   </button>
-                )}
-                <button
-                  onClick={(e) => handleDelete(e, listing.id)}
-                  className="px-3 py-1.5 bg-red-400/10 border border-red-400/20 text-red-400 hover:bg-red-400/20 rounded-lg text-xs font-medium transition-all"
-                >
-                  Sil
-                </button>
-              </div>
+                  <button
+                    onClick={(e) => handleStatusChange(e, listing.id, listing.status === "ACTIVE" ? "INACTIVE" : "ACTIVE")}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${listing.status === "ACTIVE"
+                      ? "bg-amber-400/10 border-amber-400/20 text-amber-400 hover:bg-amber-400/20"
+                      : "bg-emerald-400/10 border-emerald-400/20 text-emerald-400 hover:bg-emerald-400/20"
+                      }`}
+                  >
+                    {listing.status === "ACTIVE" ? "Pasife Al" : "Yayına Al"}
+                  </button>
+                  {listing.status !== "SOLD" && (
+                    <button
+                      onClick={(e) => handleStatusChange(e, listing.id, "SOLD")}
+                      className="px-3 py-1.5 bg-[#0f172a] border border-[#334155] text-[#94a3b8] hover:text-white rounded-lg text-xs font-medium transition-all"
+                    >
+                      Satıldı İşaretle
+                    </button>
+                  )}
+                  <button
+                    onClick={(e) => handleDelete(e, listing.id)}
+                    className="px-3 py-1.5 bg-red-400/10 border border-red-400/20 text-red-400 hover:bg-red-400/20 rounded-lg text-xs font-medium transition-all"
+                  >
+                    Sil
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         ))}
