@@ -6,7 +6,6 @@ export function useEnums() {
   const [listingStatuses, setListingStatuses] = useState({});
 
   useEffect(() => {
-    // 1. Mülk Tipleri (PropertyType.java uyumlu)
     fetch("http://localhost:8080/enums/property-types")
       .then(res => res.json())
       .then(data => {
@@ -34,7 +33,6 @@ export function useEnums() {
         setPropertyTypes(turkishPropertyTypes);
       });
 
-    // 2. Isınma Tipleri (HeatingType.java uyumlu)
     fetch("http://localhost:8080/enums/heating-types")
       .then(res => res.json())
       .then(data => {
@@ -54,7 +52,6 @@ export function useEnums() {
         setHeatingTypes(turkishHeatingTypes);
       });
 
-    // 3. İlan Durumları (ListingStatus.java uyumlu)
     fetch("http://localhost:8080/enums/listing-statuses")
       .then(res => res.json())
       .then(data => {

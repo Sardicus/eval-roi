@@ -17,41 +17,41 @@ export function userBuyerProfileEnums() {
             .then(data => {
                 const turkishEnums = {
                     householdType: {
-                        SINGLE: "Yalnız Yaşayan", //
-                        COUPLE: "Çift", //
-                        FAMILY_WITH_KIDS: "Çocuklu Aile", //
-                        RETIREE: "Emekli" //
+                        SINGLE: "Yalnız Yaşayan",
+                        COUPLE: "Çift",
+                        FAMILY_WITH_KIDS: "Çocuklu Aile",
+                        RETIREE: "Emekli"
                     },
                     lifestylePreference: {
-                        QUIET_RESIDENTIAL: "Sakin ve Yerleşim Odaklı", //
-                        VIBRANT_SOCIAL: "Hareketli ve Sosyal", //
-                        BALANCED: "Dengeli" //
+                        QUIET_RESIDENTIAL: "Sakin ve Yerleşim Odaklı",
+                        VIBRANT_SOCIAL: "Hareketli ve Sosyal",
+                        BALANCED: "Dengeli"
                     },
                     priority: {
-                        SAFETY: "Güvenlik",
-                        PRICE: "Fiyat/Uygunluk",
-                        FEATURES: "Özellikler/Lüks",
-                        LOCATION: "Konum"
+                        SAFETY_FIRST: "Güvenlik",          
+                        VALUE_FOR_MONEY: "Fiyat/Uygunluk",  
+                        PREMIUM_COMFORT: "Özellikler/Lüks", 
+                        LOCATION_CONVENIENCE: "Konum"
                     },
                     budgetSensitivity: {
-                        TIGHT: "Kısıtlı Bütçe", //
-                        FLEXIBLE: "Esnek", //
-                        NOT_A_CONCERN: "Bütçe Sorunu Yok" //
+                        TIGHT: "Kısıtlı Bütçe",
+                        FLEXIBLE: "Esnek",
+                        NOT_A_CONCERN: "Bütçe Sorunu Yok"
                     },
                     purchaseIntent: {
-                        RESIDENTIAL: "Oturum Amaçlı",
+                        BUYING: "Oturum Amaçlı",
                         INVESTMENT: "Yatırım Amaçlı",
                         VACATION: "Yazlık/Tatil"
                     },
                     ageGroup: {
-                        UNDER_30: "30 Yaş Altı", //
-                        BETWEEN_30_50: "30-50 Yaş Arası", //
-                        OVER_50: "50 Yaş Üstü" //
+                        UNDER_30: "30 Yaş Altı",
+                        BETWEEN_30_50: "30-50 Yaş Arası",
+                        OVER_50: "50 Yaş Üstü"
                     },
                     commuteImportance: {
-                        LOW: "Düşük", //
-                        MEDIUM: "Orta", //
-                        HIGH: "Yüksek" //
+                        LOW: "Düşük",
+                        MEDIUM: "Orta",
+                        HIGH: "Yüksek"
                     }
                 };
                 setEnums(turkishEnums);

@@ -17,7 +17,6 @@ function ListingsPage() {
     (user.userType === "OWNER" && user.sub === listing.ownerIdentifier)
   );
 
-
   const [filters, setFilters] = useState({
     title: "",
     city: "",

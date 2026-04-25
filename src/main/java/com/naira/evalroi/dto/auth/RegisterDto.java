@@ -10,4 +10,7 @@ public class RegisterDto {
     private String password;
     private String confirmPassword;
     private RoleEnum role;
+    private String firstName;
+    private String lastName;
+    private String phoneNumber;
 }

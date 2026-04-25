@@ -9,6 +9,7 @@ import ProtectedRoute from './Components/ProtectedRoute'
 import ProfilesPage from './Components/ProfilesPage'
 import Navbar from './Components/Navbar'
 import FraudCheckPage from './Components/FraudCheckPage'
+import UserProfilePage from './Components/UserProfilePage'
 
 const App = () => {
   return (
@@ -40,6 +41,7 @@ const App = () => {
 
       <Route path="/listing/:id" element={<ProtectedRoute><Navbar /><ListingDetailPage /></ProtectedRoute>} />
       <Route path="/profiles" element={<ProtectedRoute><Navbar /><ProfilesPage /></ProtectedRoute>} />
+      <Route path="/user-profile" element={<ProtectedRoute><Navbar /><UserProfilePage /></ProtectedRoute>} />
     </Routes>
   );
 }

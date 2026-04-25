@@ -42,7 +42,10 @@ function Navbar() {
 
         {navLink("/fraud-check", "Analiz & Denetim")}
 
-        {navLink("/profiles", "Profiller")}
+        {navLink("/profiles", "Analiz Profilleri")}
+
+        {navLink("/user-profile", "Profilim")}
+
       </div>
 
       <div className="flex items-center gap-4">
